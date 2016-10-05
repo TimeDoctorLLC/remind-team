@@ -1,0 +1,17 @@
+@import "app.scss";
+
+.dashboard {
+    #upload-csv-input {
+        display: none;
+    }
+    .control-label {
+        line-height: 30px;
+    }
+    select {
+        margin-top: 0px;
+    }
+    hr {
+        border: 0;
+        margin-bottom: 30px;
+    }
+}

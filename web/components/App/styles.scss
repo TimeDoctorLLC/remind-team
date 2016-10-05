@@ -1,0 +1,16 @@
+@import "app.scss";
+
+#root {
+    max-width: 769px;
+    margin: 40px auto;
+    padding: 0px 10px;
+
+    .alert {
+        margin: 20px 0px;
+    }
+
+    .dismiss {
+        display: block;
+        text-align: center;
+    }
+}

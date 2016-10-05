@@ -1,0 +1,64 @@
+logs
+*.log
+crash.txt
+npm-debug.log*
+
+pids
+*.pid
+*.seed
+
+.npm
+.vscode
+.project
+.settings
+.DS_Store
+.sass-cache
+node_modules
+*.sw*
+.env
+
+# webpack build files
+web/dist
+
+# prod sql reset file
+sql/db-reset-prod.sql
+
+### Windows ###
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+### Linux ###
+*~
+.directory
+.Trash-*
+
+### OSX ###
+*.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+### SublimeText ###
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+*.sublime-workspace
+*.sublime-project
+sftp-config.json

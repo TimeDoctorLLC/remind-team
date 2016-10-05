@@ -1,0 +1,50 @@
+// Adapted from http://cookieshq.co.uk/posts/extend-bootstrap-media-queries-with-less/
+
+/* Bootstrap deprecated @screen-xs-min as of v3.2.0 so we will target everything below 767px for phones */
+$bs3-xs: (max-width:767px); /*  For Phones*/
+$bs3-sm: (min-width:$screen-sm-min); /*  For Small devices Tablets*/
+$bs3-md: (min-width:$screen-md-min); /*  For Medium devices Desktops */
+$bs3-lg: (min-width:$screen-lg-min); /*  For Large devices Desktops */
+
+// from http://www.cssarrowplease.com/
+.arrow_box {
+  position: relative;
+  background: #fff;
+  // border: 1px solid #fff;
+}
+.arrow_box:after, .arrow_box:before {
+  right: 100%;
+  top: 40%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.arrow_box:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-right-color: #fff;
+  border-width: 15px;
+  margin-top: -15px;
+}
+.arrow_box:before {
+  border-color: rgba(255, 255, 255, 0);
+  border-right-color: #fff;
+  border-width: 11px;
+  margin-top: -11px;
+}
+
+/* centered columns styles */
+.row-centered {
+    text-align:center;
+}
+.col-centered {
+    display:inline-block;
+    float:none;
+    /* reset the text-align */
+    text-align:left;
+    /* inline-block space fix */
+    margin-right:-4px;
+}

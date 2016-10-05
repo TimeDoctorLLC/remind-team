@@ -1,0 +1,95 @@
+@import "partials/variables";
+@import "partials/helpers";
+@import "bootstrap-custom";
+
+body {
+    padding: 0;
+    margin: 0;
+    font-weight: 400;
+    color: #676767;
+    margin-top: $navbar-height + 20px;
+}
+
+h2 {
+  margin-bottom: 20px;
+
+  @media (max-width: 767px) {
+    font-size: $font-size-h2-mobile;
+  }
+}
+
+form {
+  margin: 0px;
+  padding: 0px;
+  * {
+    vertical-align: top;
+  }
+}
+
+textarea {
+    border-radius: $border-radius-base;
+    border: 1px #efefef solid;
+    background-color: #f9f9f9;
+    padding: 10px;
+    outline: 0;
+}
+textarea::-webkit-input-placeholder, textarea:-moz-placeholder, textarea::-moz-placeholder, textarea:-ms-input-placeholder {
+    color:    #888888;
+}
+
+input[type=text], input[type=password] {
+    -webkit-border-radius: $border-radius-base;
+		-moz-border-radius: $border-radius-base;
+    border-radius: $border-radius-base;
+    border: 1px #c5c5c5 solid;
+    background-color: #f9f9f9;
+    padding: 6px 10px;
+    outline: 0;
+}
+input[type=text]::-webkit-input-placeholder, input[type=text]:-moz-placeholder, input[type=text]::-moz-placeholder, input[type=text]:-ms-input-placeholder,
+input[type=password]::-webkit-input-placeholder, input[type=password]:-moz-placeholder, input[type=password]::-moz-placeholder, input[type=password]:-ms-input-placeholder {
+    color:    #c5c5c5;
+}
+
+.well textarea, .well input {
+  background-color: #fff;
+}
+
+select {
+    margin-top: 20px;
+    width: 100%;
+    padding: 7px 10px;
+    line-height: 30px;
+    display: block;
+    color: #505050;
+    border: 1px solid #F2F2F2;
+    font-weight: normal;
+
+    background-color: transparent;
+    -webkit-border-radius: $border-radius-base;
+		-moz-border-radius: $border-radius-base;
+    border-radius: $border-radius-base;
+    outline: 0;
+}
+// replaces the check icon with a lock icon
+.custom-select {
+  position: relative;
+
+  select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+}
+.custom-select:before {
+    content:"\e114";
+    font-size: 12px;
+    font-weight: normal;
+    font-family: 'Glyphicons Halflings';
+    position: absolute;
+    line-height: 30px;
+    top: 50%;
+    right: 10px;
+    margin-top: -15px;
+    z-index: -1;
+} 

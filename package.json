@@ -1,0 +1,60 @@
+{
+  "name": "goalreminder-app",
+  "description": "Goal Reminder App Backend",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node app.js",
+    
+    "test": "mocha --bail \"storage/test/!(fixtures.js)\" \"bot/test/!(bot.js)\"",
+    "integration-tests": "mocha --bail web/test/index.js || true",
+    
+    "build-emails": "cd emails && npm run build",
+        
+    "db-reset-dev": "psql -U postgres -d postgres -a -f sql/db-reset-dev.sql || sudo -u postgres psql -d postgres -a -f sql/db-reset-dev.sql",
+    "db-reset-test": "psql -U postgres -d postgres -a -f sql/db-reset-test.sql || sudo -u postgres psql -d postgres -a -f sql/db-reset-test.sql"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TimeDoctorLLC/GoalReminder.git"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/TimeDoctorLLC/GoalReminder/issues"
+  },
+  "homepage": "https://github.com/TimeDoctorLLC/GoalReminder#readme",
+  "devDependencies": {
+    "mocha": "~2.2.5",
+    "chai": "~3.5.0"
+  },
+  "dependencies": {
+    "express": "~4.14.0",
+    "express-winston": "~1.4.2",
+    "body-parser": "~1.15.2",
+    "jwt-simple": "~0.5.0",
+    "bcrypt": "~0.8.7",
+    "crypto": "~0.0.3",
+    "validator": "~5.7.0",
+    "moment": "~2.13.0",
+    "swagger-ui": "~2.1.4",
+    
+    "debug": "~2.2.0",
+    "winston": "~2.2.0",
+    "dotenv": "~2.0.0",
+    "node-schedule": "~1.1.1",
+
+    "pg": "~6.0.1",
+    "pg-escape": "~0.2.0",
+    "node-pg-easy": "~1.0.0",
+    "node-pg-sqlbuilder": "~1.0.0",
+
+    "q": "~1.4.1",
+    "underscore": "~1.8.3",
+    "request": "~2.73.0",
+
+    "nodemailer": "~2.5.0",
+    "nodemailer-sendmail-transport": "~1.0.0",
+    "string-template": "~1.0.0"
+  }
+}

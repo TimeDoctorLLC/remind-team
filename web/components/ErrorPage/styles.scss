@@ -1,0 +1,103 @@
+@import "app.scss";
+
+#errorBody {
+	width: 100%;
+	padding: 50px;
+	text-align: center;
+	background: transparent repeat-y url('/images/section-three-bg.jpg');
+    background-size: cover;
+    background-position: top center;
+
+    font-family: $font-family-gotham;
+
+    section.first {
+    	margin: 0 auto;
+    	max-width: 1024px;
+    	color: #fff;
+
+        .content {
+            margin: 60px auto 50px auto;
+
+            h1 {
+            	color: #fff;
+            	text-transform: uppercase;
+            	text-shadow: 1px 1px 1px rgba(150, 150, 150, 0.25);
+            }
+
+            .lead {
+            	width: 70%;
+            	text-align: center;
+            	margin: 20px auto;
+            	font-size: .9em;
+            }
+
+            .subcontent {
+                max-width: 530px;
+                width: 100%;
+                display: block;
+                margin: auto;
+            }
+            .back-button {
+            	display: block;
+            	margin: 40px auto;
+            	text-align: center;
+            	width: 117px;
+            	height: 55px;
+            	background: transparent no-repeat url('/images/go-home-btn.png');
+            	background-size: 117px 55px;
+            	border: 0 none;
+            	line-height: 36px;
+            	text-shadow: 1px 1px 1px rgba(150, 150, 150, 0.25);
+            }
+        }
+
+        .row.first {
+            color: #fff;
+            margin-top: 15px;
+
+            .header-logo {
+                line-height: 40px;
+                display: inline-block;
+
+                @media (max-width: 767px) {
+                    display: block;
+                    text-align: center;
+                }
+
+                img {
+                    width: 165px;
+                    max-width: 450px;
+                }
+            }
+
+            .header-buttons {
+                float: right;
+                list-style: none;
+
+                @media (max-width: 767px) {
+                    display: none; 
+                }
+
+                li {
+                    display: inline-block;
+                    text-indent: 0px;
+                    margin-left: 30px;
+                }
+
+                .how-it-works {
+                    font-family: $font-family-gotham;
+                    font-size: 15px;
+                    font-weight: 400;
+                    text-decoration: none;
+                    height: 46px;
+                    line-height: 45px;
+                    display: block;
+                    color: #fff;
+                }
+            }
+            .header-buttons::after {
+                clear:  both;
+            }
+        }
+    }
+}
