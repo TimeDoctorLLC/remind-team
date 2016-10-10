@@ -24,7 +24,7 @@ router.post('/', utils.mws.jsonInputEnforcer, function(req, res, next) {
 
         return gcm.test(gcm_id).then(function() {
             storage.employees.save(employee).then(function(employeeRes) {
-                res.status(204).json(employeeRes.rows[0]).end();
+                res.status(200).json(employeeRes.rows[0]).end();
             });
         });
 

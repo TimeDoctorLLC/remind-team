@@ -1,18 +1,18 @@
 import {connect} from 'react-redux'
-import ContactInsert from './'
+import InvitePage from './'
 
 import actions from '../../actions'
 
 const mapStateToProps = (state) => {
     return {
-        user: state.main.user
+        invite_accepted: state.main.invite_accepted
     }
 }
 
 const mapDispatchToProps = (dispatch) => ({
-    onInsert: function(contact) {
-      dispatch(actions.addContact(contact))
+    accept: function(code, gcmId) {
+      dispatch(actions.acceptInvite(code, gcmId))
     }
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(ContactInsert)
+export default connect(mapStateToProps, mapDispatchToProps)(InvitePage)

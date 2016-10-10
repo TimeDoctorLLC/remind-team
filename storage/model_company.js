@@ -24,7 +24,7 @@ module.exports = function(db, eventTracker) {
         'tbl_company.user_name',
         'tbl_company.user_email',
         'tbl_company.user_password',
-        'tbl_company.notification_interval',
+        'EXTRACT(\'EPOCH\' FROM tbl_company.notification_interval) as notification_interval',
         'to_char(tbl_company.registration_ts, \'' + TIMESTAMP_FORMAT + '\') as registration_ts', 
         '(CASE WHEN tbl_company.deactivation_ts IS NULL THEN NULL ELSE to_char(tbl_company.deactivation_ts, \'' + TIMESTAMP_FORMAT + '\') END) as deactivation_ts'
     ];

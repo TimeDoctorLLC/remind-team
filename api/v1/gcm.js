@@ -8,6 +8,12 @@ var gcm = {};
 gcm.test = function(registrationId) {
     var deferred = Q.defer();
 
+    var data = {
+        title: 'Welcome to Goal Reminder',
+        body: 'You\'ll now start receiving notifications with your Goals!',
+        icon: ''
+    };
+
     request.post({
         url: ENDPOINT,
         headers: {
@@ -15,7 +21,9 @@ gcm.test = function(registrationId) {
         },
         json: true,
         body: {
-            registration_ids: [registrationId]
+            to: registrationId,
+            notification: data,
+            data: data
         }    
     }, function(error, response, body) {
         if(error || response.statusCode != 200) {
@@ -37,6 +45,12 @@ gcm.test = function(registrationId) {
 gcm.notify = function(registrationId, goals) {
     var deferred = Q.defer();
 
+    var data = {
+        title: 'Goals',
+        body: goal.join(', '),
+        icon: ''
+    };
+
     request.post({
         url: ENDPOINT,
         headers: {
@@ -45,11 +59,8 @@ gcm.notify = function(registrationId, goals) {
         json: true,
         body: {
             to: registrationId,
-            notification: {
-                title: 'Goals',
-                body: goal.join(', '),
-                icon: ''
-            }
+            notification: data,
+            data: data
         }    
     }, function(error, response, body) {
         if(error || response.statusCode != 200) {

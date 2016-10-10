@@ -17,7 +17,7 @@ export function getCompany(id) {
         if(err && (err.status == 403 || err.status == 401)) {
           dispatch(logout())
         }
-        dispatch(err ? registerAlert(GET_COMPANY_KEY, "error", {err, res}) : registerApiOk(GET_COMPANY_KEY, {state_key: 'company', body: res.body}))
+        dispatch(err ? registerAlert(GET_COMPANY_KEY, "error", {err, res}) : registerApiOk(GET_COMPANY_KEY, {persist: true, state_key: 'company', body: res.body}))
       })
   }
 }
@@ -47,7 +47,7 @@ export function saveCompany(company) {
           dispatch(registerAlert(SAVE_COMPANY_KEY, "error", {err, res}))
         } else {
           dispatch(registerAlert(SAVE_COMPANY_KEY, "msg", "Company data saved!"))
-          dispatch(registerApiOk(SAVE_COMPANY_KEY, {state_key: 'company', body: res.body}))
+          dispatch(registerApiOk(SAVE_COMPANY_KEY, [{persist: true, state_key: 'token', body: res.body.at}, {persist: true, state_key: 'company', body: res.body.company}]))
         }
       })
   }

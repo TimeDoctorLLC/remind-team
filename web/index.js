@@ -15,6 +15,8 @@ import SignUpPage from './components/SignUpPage/controller'
 import InvitePage from './components/InvitePage/controller'
 import ErrorPage from './components/ErrorPage/controller'
 
+import actions from './actions'
+
 const initialState = { 
   token: localStorage.getItem('token'), 
   company: JSON.parse(localStorage.getItem('company'))

@@ -18,6 +18,12 @@ const mapDispatchToProps = (dispatch) => ({
     },
     clearAlert: function(key) {
       dispatch(actions.clearAlert(key))
+    },
+    save: function(company) {
+      dispatch(actions.saveCompany(company))
+    },
+    refresh: function(companyId) {
+      dispatch(actions.getCompany(companyId))
     }
 })
 

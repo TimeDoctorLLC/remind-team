@@ -5,5 +5,5 @@
  */
 export function logout(state, action) {
   localStorage.clear()
-  return Object.assign({}, state, {token: null, company: null})
+  return Object.assign({}, state, { token: null, company: null, alerts: {} })
 }
