@@ -10,7 +10,7 @@ export function acceptInvite(code, gcmId) {
     dispatch(registerLoadingOperation(ACCEPT_INVITE_KEY, {code, gcmId}))
 
     superagent
-      .post((process.env.API_ROOT || '') + '/api/v1/companies/invite')
+      .post((process.env.API_ROOT || '') + '/api/v1/companies/invite?_=' + new Date().getTime())
       .send({ code: code, gcm_id: gcmId })
       .end(function(err, res) {
         if(err) {

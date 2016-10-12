@@ -20,6 +20,7 @@ CREATE TABLE tbl_employee (
     invite_accepted boolean NOT NULL DEFAULT false,
     invite_sent boolean NOT NULL DEFAULT false,
     gcm_id text,
+    last_notification_ts TIMESTAMP WITHOUT TIME ZONE,
     deactivation_ts TIMESTAMP WITHOUT TIME ZONE,
     registration_ts TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     UNIQUE (company_id, email)

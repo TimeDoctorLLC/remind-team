@@ -9,7 +9,7 @@ var logger = require('../../globals/logger.js').api;
 var auth = require('./auth.js');
 var invite = require('./invite.js');
 var companies = require('./company.js');
-//var invites = require('./invites.js');
+var employees = require('./employee.js');
 
 var loggerRequestWhitelist = ['url', 'headers', 'method', 'httpVersion', 'originalUrl', 'query', 'params', 'body'];
 var loggerResponseWhitelist = ['statusCode', 'body'];
@@ -19,7 +19,7 @@ router.use(bodyParser.json());
 router.use('/auth', auth);
 router.use('/companies/invite', invite);
 router.use('/companies', companies);
-//router.use('/companies/invite', invites);
+router.use('/employees', employees);
 
 // 404 if resource not found
 router.use(function(req, res, next) {

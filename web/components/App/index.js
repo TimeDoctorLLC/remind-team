@@ -7,8 +7,8 @@ import NavBar from '../NavBar'
 import Loading from '../Loading'
 
 const render = (ctx) => {
-    let alertError = null
-    let alertMsg = null
+    let alertError = null;
+    let alertMsg = null;
 
     if(ctx.errors.length > 0) {
         alertError = (
@@ -21,7 +21,7 @@ const render = (ctx) => {
                     })}
                 </div>
             </div>
-        )
+        );
     }
 
     if(ctx.msgs.length > 0) {
@@ -35,10 +35,10 @@ const render = (ctx) => {
                     })}
                 </div>
             </div>
-        )
+        );
     }
 
-    const dismissLink = alertError || alertMsg ? (<a href="#" className="dismiss" onClick={ctx.dismiss}>Dismiss</a>) : null
+    const dismissLink = alertError || alertMsg ? (<a href="#" className="dismiss" onClick={ctx.dismiss}>Dismiss</a>) : null;
 
     return (
         <div id="root">
@@ -50,12 +50,12 @@ const render = (ctx) => {
             { dismissLink }
             { ctx.props.children }
         </div>
-    )
+    );
 }
 
 export default _.present(render, {
     dismiss: function(e) {
-        e.preventDefault()
-        this.props.onDismissError()
+        e.preventDefault();
+        this.props.onDismissError();
     }
 })

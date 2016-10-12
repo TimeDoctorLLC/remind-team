@@ -7,6 +7,47 @@ import Q from 'q';
 
 import CSVLink from '../CSVLink';
 
+function copyToClipboard(text) {
+
+	  // create hidden text element, if it doesn't already exist
+    var targetId = "_hiddenCopyText_";
+    var origSelectionStart, origSelectionEnd;
+    
+    // must use a temporary form element for the selection and copy
+    var target = document.getElementById(targetId);
+    if (!target) {
+        target = document.createElement("textarea");
+        target.style.position = "absolute";
+        target.style.left = "-9999px";
+        target.style.top = "0";
+        target.id = targetId;
+        document.body.appendChild(target);
+    }
+    target.textContent = text;
+
+    // select the content
+    var currentFocus = document.activeElement;
+    target.focus();
+    target.setSelectionRange(0, target.value.length);
+    
+    // copy the selection
+    var succeed;
+    try {
+    	  succeed = document.execCommand("copy");
+    } catch(e) {
+        succeed = false;
+    }
+    // restore original focus
+    if (currentFocus && typeof currentFocus.focus === "function") {
+        currentFocus.focus();
+    }
+    
+    // clear temporary content
+    target.textContent = "";
+
+    return succeed;
+}
+
 function getCSVFromFile(file) {
   var deferred = Q.defer();
 
@@ -88,8 +129,8 @@ const render = (ctx) => {
                   return (
                     <tr key={employee.email}>
                       <td>{employee.email}</td>
-                      <td>{employee.invite_sent ? 'Invite not sent!' : (employee.invite_accepted ? 'Done!' : 'Waiting registration')}</td>
-                      <td>{employee.invite_link ? (<a href={employee.invite_link}>Link</a>) : (<span className="not-saved">Not saved!</span>)}</td>
+                      <td>{employee.invite_sent ? (employee.invite_accepted ? (<span className="label label-success">Done!</span>) : (<span className="label label-info">Waiting Registration</span>)) : (<span className="label label-warning">Invite Not Sent</span>)}</td>
+                      <td>{employee.invite_code ? (<a onClick={ctx.onLinkCopy} href={'/invite/' + employee.invite_code} className="invite-link">Copy </a>) : (<span className="not-saved label label-warning">Not Saved</span>)}</td>
                     </tr>
                   )
                 })
@@ -103,7 +144,10 @@ const render = (ctx) => {
           )
         }
 
-        <div><a className="btn btn-success" onClick={ctx.onSave}>Save</a></div>
+        <div>
+          <div className="pull-left"><a className="btn btn-success" onClick={ctx.onSave}>Save</a></div>
+          <div className="pull-right"><a className="btn btn-default" onClick={ctx.onRefresh}><span className="glyphicon glyphicon-refresh" aria-hidden="true"></span> Refresh</a></div>
+        </div>
       </div>
     );
   }
@@ -119,23 +163,47 @@ const render = (ctx) => {
   )
 };
 
-export default _.present(render, {
-  csvFile: null,
-  getInitialState: function() {
-    this.props.refresh(this.props.company.company_id);
-
-    console.log('InitialState Company', this.props.company);
+function initState(props) {
+    console.debug('initState', props);
     return {
-      employeesOrder: __.map(this.props.company.employees, function(employee) {
+      employeesOrder: __.map(props.company.employees, function(employee) {
         return employee.email.toLowerCase().trim()
       }),
-      employeesByEmail: __.reduce(this.props.company.employees, function(obj, employee) {
+      employeesByEmail: __.reduce(props.company.employees, function(obj, employee) {
         obj[employee.email.toLowerCase().trim()] = employee
         return obj;
       }, {})
     };
+}
+
+export default _.present(render, {
+  refreshInterval: null,
+  getInitialState: function() {
+    // for the first time
+    return initState(this.props);
+  },
+  componentWillReceiveProps: function(nextProps) {
+    // for every subsequent times it gets new props
+    this.setState(initState(nextProps));
+  },
+  componentDidMount: function() {
+    // always refresh on load and set up a timer
+    this.props.refresh(this.props.company.company_id);
+    this.refreshInterval = setInterval(() => {
+      this.props.refresh(this.props.company.company_id);
+    }, 900000); // 15 mins.
+  },
+  componentWillUnmount: function() {
+    // remove the refresh timer
+    if(this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+    }
+  },
+  onRefresh: function() {
+    this.props.refresh(this.props.company.company_id);
   },
   onUploadCsv: function() {
+    // click the hidden file input elem
     $('.dashboard #upload-csv-input').click();
   },
   onUploadCsvChange: function(e) {
@@ -148,8 +216,6 @@ export default _.present(render, {
     const t = this;
 
     getCSVFromFile(e.target.files[0]).then(function(data) {
-      console.log("Parsing complete:", data);
-
       const newEmployeesOrder = [];
       const newEmployeesByEmail = {};
 
@@ -168,15 +234,12 @@ export default _.present(render, {
         employeesByEmail: newEmployeesByEmail
       });
     }, function(errors) {
-      // ERR HERE
-      console.log("Parsing error:", errors);
+      console.error("Parsing error:", errors);
       t.props.registerAlert('CSV_ERROR', 'error', errors);
     }).done();
   },
   onSave: function(e) {
     e.preventDefault();
-
-    console.log(this.state.employeesOrder, this.state.employeesByEmail, this.props.company);
     
     const newCompany = __.extend({}, this.props.company, {
       notification_interval: parseInt(this.refs.notification_interval.value, 10),
@@ -185,8 +248,6 @@ export default _.present(render, {
       })
     });
 
-    console.log(newCompany);
-
     this.props.save(newCompany);
   },
   getCsv: function() {
@@ -194,5 +255,14 @@ export default _.present(render, {
         var e = this.state.employeesByEmail[email];
         return [e.email].concat(e.goals);
     }));
+  },
+  onLinkCopy: function(e) {
+    e.preventDefault();
+    this.props.clearAlert('CLIPBOARD');
+    if(copyToClipboard($(e).prop('href'))) {
+      this.props.registerAlert('CLIPBOARD', 'msg', 'Invite link copied to clipboard!');
+    } else {
+      this.props.registerAlert('CLIPBOARD', 'error', 'Unable to copy to clipboard!');
+    }
   }
 });

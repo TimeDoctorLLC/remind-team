@@ -14,7 +14,7 @@ module.exports = function(db, eventTracker) {
     var TIMESTAMP_FORMAT = 'YYYY-MM-DD HH24:MI:SS';
     
     var TABLE = 'tbl_employee';
-    var INSERT_FIELDS = 'company_id, email, goals, invite_hash, registration_ts';
+    var INSERT_FIELDS = 'company_id, email, goals, invite_hash, registration_ts, last_notification_ts';
     var RETURN_FIELDS = [
         'tbl_employee.employee_id',
         'tbl_employee.company_id',
@@ -24,6 +24,7 @@ module.exports = function(db, eventTracker) {
         'tbl_employee.invite_accepted',
         'tbl_employee.invite_sent',
         'tbl_employee.gcm_id',
+        '(CASE WHEN tbl_employee.last_notification_ts IS NULL THEN NULL ELSE to_char(tbl_employee.last_notification_ts, \'' + TIMESTAMP_FORMAT + '\') END) as last_notification_ts',
         'to_char(tbl_employee.registration_ts, \'' + TIMESTAMP_FORMAT + '\') as registration_ts', 
         '(CASE WHEN tbl_employee.deactivation_ts IS NULL THEN NULL ELSE to_char(tbl_employee.deactivation_ts, \'' + TIMESTAMP_FORMAT + '\') END) as deactivation_ts'
     ];
@@ -44,6 +45,34 @@ module.exports = function(db, eventTracker) {
         var query = sql.select(RETURN_FIELDS).from(TABLE).where('company_id = $1' + (includeDeleted ? '' : ' AND deactivation_ts IS NULL')).end().build();  
         return (trans ? trans.execute(query, [companyId]) : db.execute(query, [companyId]));
     };
+
+    model.allExpiredAt = function(ts, tsFormat) {
+        if(!tsFormat) {
+            tsFormat = TIMESTAMP_FORMAT;
+        }
+
+        var query = 'SELECT tbl_employee.* FROM tbl_employee, tbl_company WHERE tbl_employee.company_id = tbl_company.company_id AND ' +
+            'tbl_company.deactivation_ts IS NULL AND tbl_employee.deactivation_ts IS NULL AND tbl_employee.invite_accepted = TRUE AND ' +
+            '(tbl_employee.last_notification_ts IS NULL OR (to_timestamp($1, $2) - tbl_employee.last_notification_ts) > tbl_company.notification_interval);';
+          
+        return db.execute(query, [ts, tsFormat]);
+    };
+
+    model.updateExpired = function(employeeIds, newNotificationTs, newNotificationTsFormat) {
+
+        if(!newNotificationTsFormat) {
+            newNotificationTsFormat = TIMESTAMP_FORMAT;
+        }
+
+        var query = sql.update(TABLE)
+            .set('last_notification_ts = to_timestamp($1, $2)')
+            .whereOr(_.map(employeeIds, function(id, i) {
+                return 'tbl_employee.employee_id = $' + (i + 3);    // start at 3
+            }))
+            .returning(RETURN_FIELDS).end().build();
+          
+        return db.execute(query, [newNotificationTs, newNotificationTsFormat].concat(employeeIds));
+    };
     
     model.save = function(data, trans) {
 
@@ -62,9 +91,10 @@ module.exports = function(db, eventTracker) {
                 'invite_sent = (CASE WHEN deactivation_ts IS NULL THEN $5 ELSE false END)',
                 'gcm_id = (CASE WHEN deactivation_ts IS NULL THEN $6 ELSE NULL END)',
                 'invite_hash = (CASE WHEN deactivation_ts IS NULL THEN invite_hash ELSE $7 END)',
-                'deactivation_ts = NULL'
+                'deactivation_ts = NULL',
+                'last_notification_ts = (CASE WHEN deactivation_ts IS NULL THEN to_timestamp($8, \'' + TIMESTAMP_FORMAT + '\') ELSE NULL END)'
             ).where('employee_id = $1').returning(RETURN_FIELDS).end().build();
-            var args = [data.employee_id, data.email.trim(), '{"' + data.goals.join('","') + '"}', data.invite_accepted, data.invite_sent, data.gcm_id, hash];
+            var args = [data.employee_id, data.email.trim(), '{"' + data.goals.join('","') + '"}', data.invite_accepted, data.invite_sent, data.gcm_id, hash, data.last_notification_ts];
             
             return (trans ? trans.execute(query, args) : db.execute(query, args)).then(function(res) {
                 eventTracker && eventTracker.trigger('employee.update', [res]);
@@ -79,11 +109,11 @@ module.exports = function(db, eventTracker) {
         }
         
         // insert
-        data.registration_ts = datetime.getCurrentTimestamp();
+        data.registration_ts = data.last_notification_ts = datetime.getCurrentTimestamp();
         data.invite_hash = hash;
 
         var query = sql.insert(INSERT_FIELDS).into(TABLE).entry().returning(RETURN_FIELDS).end().build();
-        var args = [data.company_id, data.email.trim(), '{"' + data.goals.join('","') + '"}', data.invite_hash, data.registration_ts];
+        var args = [data.company_id, data.email.trim(), '{"' + data.goals.join('","') + '"}', data.invite_hash, data.registration_ts, data.last_notification_ts];
         
         return (trans ? trans.execute(query, args) : db.execute(query, args)).then(function(res) {
             data.employee_id = res.rows[0].employee_id;

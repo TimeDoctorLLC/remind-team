@@ -13,7 +13,7 @@ export function login(email, password) {
     dispatch(registerLoadingOperation(LOGIN_KEY, {email, password}))
 
     superagent
-      .post((process.env.API_ROOT || '') + '/api/v1/auth')
+      .post((process.env.API_ROOT || '') + '/api/v1/auth?_=' + new Date().getTime())
       .auth(email, password)
       .end(function(err, res) {
         dispatch(err ? registerAlert(LOGIN_KEY, "error", {err, res}) : registerApiOk(LOGIN_KEY, [{persist: true, state_key: 'token', body: res.body.at}, {persist: true, state_key: 'company', body: res.body.company}]))
@@ -38,7 +38,7 @@ export function register(name, email, password) {
     dispatch(registerLoadingOperation(REGISTER_KEY, {name, email, password}))
 
     superagent
-      .post((process.env.API_ROOT || '') + '/api/v1/companies')
+      .post((process.env.API_ROOT || '') + '/api/v1/companies?_=' + new Date().getTime())
       .send({ user_name: name, user_email: email, user_password: password })
       .end(function(err, res) {
         dispatch(err ? registerAlert(REGISTER_KEY, "error", {err, res}) : registerApiOk(REGISTER_KEY, [{persist: true, state_key: 'token', body: res.body.at}, {persist: true, state_key: 'company', body: res.body.company}]))

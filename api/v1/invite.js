@@ -1,6 +1,7 @@
 var router = require('express').Router({mergeParams: true});
 var request = require('request');
 
+var logger = require('../../globals/logger.js').api;
 var storage = require('../../storage');
 var utils = require('./utils.js');
 var gcm = require('./gcm.js');
@@ -13,8 +14,7 @@ router.post('/', utils.mws.jsonInputEnforcer, function(req, res, next) {
     storage.employees.getByHash(info.company_id, info.hash, info.email).then(function(employeeRes) {
 
         if(!employeeRes || !employeeRes.rows || employeeRes.rows.length <= 0) {
-            next({status: 404});
-            return;
+            throw {status: 404};
         }
 
         var employee = employeeRes.rows[0];
@@ -23,11 +23,14 @@ router.post('/', utils.mws.jsonInputEnforcer, function(req, res, next) {
         employee.gcm_id = gcm_id;
 
         return gcm.test(gcm_id).then(function() {
-            storage.employees.save(employee).then(function(employeeRes) {
-                res.status(200).json(employeeRes.rows[0]).end();
+            return storage.employees.save(employee).then(function(employeeRes) {
+                return employeeRes.rows[0];
             });
         });
 
+    }).then(function(employee) {
+        logger.info('Invitation accepted!', employee.employee_id, info);
+        res.status(200).json(employee).end();
     }, function(err) {
         next(err);
     }).done();

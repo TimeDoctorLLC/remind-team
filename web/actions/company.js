@@ -11,7 +11,7 @@ export function getCompany(id) {
     dispatch(registerLoadingOperation(GET_COMPANY_KEY, { ts: Date.now() }))
 
     superagent
-      .get((process.env.API_ROOT || '') + '/api/v1/companies/' + id)
+      .get((process.env.API_ROOT || '') + '/api/v1/companies/' + id + '?_=' + new Date().getTime())
       .set('Authorization', 'Bearer ' + main.token)
       .end(function(err, res) {
         if(err && (err.status == 403 || err.status == 401)) {
@@ -36,7 +36,7 @@ export function saveCompany(company) {
     dispatch(registerLoadingOperation(SAVE_COMPANY_KEY, company))
 
     superagent
-      .post((process.env.API_ROOT || '') + '/api/v1/companies/' + company.company_id)
+      .post((process.env.API_ROOT || '') + '/api/v1/companies/' + company.company_id + '?_=' + new Date().getTime())
       .set('Authorization', 'Bearer ' + main.token)
       .send(company)
       .end(function(err, res) {

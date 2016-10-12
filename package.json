@@ -1,16 +1,14 @@
 {
   "name": "goalreminder-app",
-  "description": "Goal Reminder App Backend",
+  "description": "Goal Reminder App",
   "version": "0.0.1",
   "private": true,
   "scripts": {
     "start": "node app.js",
-    
-    "test": "mocha --bail \"storage/test/!(fixtures.js)\" \"bot/test/!(bot.js)\"",
-    "integration-tests": "mocha --bail web/test/index.js || true",
-    
-    "build-emails": "cd emails && npm run build",
-        
+
+    "webpack": "webpack --config ./web/webpack.config.js && webpack --config ./web/service_worker/webpack.config.js",
+    "webpack-dev-server": "npm run webpack && \"node_modules/.bin/webpack-dev-server\" --content-base ./web/dist/",
+
     "db-reset-dev": "psql -U postgres -d postgres -a -f sql/db-reset-dev.sql || sudo -u postgres psql -d postgres -a -f sql/db-reset-dev.sql",
     "db-reset-test": "psql -U postgres -d postgres -a -f sql/db-reset-test.sql || sudo -u postgres psql -d postgres -a -f sql/db-reset-test.sql"
   },
@@ -26,7 +24,37 @@
   "homepage": "https://github.com/TimeDoctorLLC/GoalReminder#readme",
   "devDependencies": {
     "mocha": "~2.2.5",
-    "chai": "~3.5.0"
+    "chai": "~3.5.0",
+
+    "webpack": "~1.13.1",
+    "webpack-dev-server": "~1.16.1",
+    "node-sass": "~3.8.0",
+    "react": "~15.2.1",
+    "react-dom": "~15.2.1",
+    "react-redux": "~4.4.5",
+    "react-router": "~2.6.1",
+    "react-router-redux": "~4.0.5",
+    "redux": "~3.5.2",
+    "redux-thunk": "~2.1.0",
+    "css-loader": "~0.23.1",
+    "file-loader": "~0.9.0",
+    "sass-loader": "~3.2.1",
+    "style-loader": "~0.13.1",
+    "json-loader": "~0.5.4",
+    "babel-loader": "~6.2.4",
+    "babel-core": "~6.10.4",
+    "babel-preset-es2015": "~6.9.0",
+    "babel-preset-react": "~6.11.1",
+    "babel-polyfill": "~6.16.0",
+    "babel-preset-stage-0": "~6.16.0",
+    "bootstrap-sass": "~3.3.6",
+    "superagent": "~2.1.0",
+    "papaparse": "~4.1.2",
+    "dexie": "~1.4.2",
+    
+    "extract-text-webpack-plugin": "~1.0.1",
+    "optimize-css-assets-webpack-plugin": "~1.3.0",
+    "cssnano": "~3.7.5"
   },
   "dependencies": {
     "express": "~4.14.0",

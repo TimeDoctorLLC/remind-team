@@ -12,6 +12,12 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => ({
     accept: function(code, gcmId) {
       dispatch(actions.acceptInvite(code, gcmId))
+    },
+    startLoading: function() {
+        dispatch(actions.registerLoadingOperation('INVITE_LOADING', {}));
+    },
+    stopLoading: function() {
+        dispatch(actions.clearLoadingOperation('INVITE_LOADING'));
     }
 })
 

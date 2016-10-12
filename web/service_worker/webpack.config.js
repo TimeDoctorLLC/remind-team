@@ -3,13 +3,17 @@ const webpack = require('webpack')
 
 module.exports = {
   context: __dirname,
-  entry: './index.js',
+  entry: ['babel-polyfill', './index.js'],
   output: {
     path: path.resolve(__dirname, '../dist'),
     filename: 'sw.js',
   },
   module: {
     loaders: [
+      {
+        test: /\.png/,
+        loader: 'file?name=/images/[name].[ext]'
+      },
       {
         test: /\.js$/,
         exclude: /node_modules/,

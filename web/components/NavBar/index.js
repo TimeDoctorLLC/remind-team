@@ -1,5 +1,5 @@
 import './styles.scss'
-import '../../node_modules/bootstrap-sass/assets/javascripts/bootstrap.min.js'
+import '../../../node_modules/bootstrap-sass/assets/javascripts/bootstrap.min.js'
 import React from 'react'
 import { Link } from 'react-router'
 import _ from '../utils'
@@ -19,7 +19,7 @@ const render = (ctx) => {
             <span className="icon-bar"></span>
             <span className="icon-bar"></span>
           </button>
-          <a className="navbar-brand" href="#">Goal Reminder</a>
+          <a className="navbar-brand" href="/">Goal Reminder</a>
         </div>
 
         <div className="collapse navbar-collapse" id="navbar-collapse-1">

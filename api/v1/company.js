@@ -8,33 +8,44 @@ var storage = require('../../storage');
 var utils = require('./utils.js');
 var mailer = require('./mailer.js');
 
-storage.on('employee.insert,employee.update', function(employeeRes) {
-    if(!employeeRes || !employeeRes.rows) {
-        return;
+function getInviteCode(employee) {
+    return utils.createJwt({
+        company_id: employee.company_id,
+        email: employee.email,
+        hash: employee.invite_hash
+    });
+}
+
+function fillInviteCodes(employees) {
+    return _.map(employees, function(employee) {
+        employee.invite_code = getInviteCode(employee);
+        return employee;
+    });
+}
+
+function sendInvites(company, employees) {
+    if(!employees || employees.length <= 0) {
+        return Q();
     }
 
-    _.each(employeeRes.rows, function(employee) {
+    return Q.all(_.reduce(employees, function(arr, employee) {
         if(!employee.invite_sent) {
             // send invite
-            var inviteCode = utils.createJwt({
-                company_id: employee.company_id,
-                email: employee.email,
-                hash: employee.invite_hash
-            });
+            var inviteCode = getInviteCode(employee);
             
-            console.log('sending invite...', employee, inviteCode);
+            logger.info('Sending invite...', employee, inviteCode);
 
-            storage.companies.get(employee.company_id).then(function(companyRes) {
-                return mailer.sendInvite(companyRes.rows[0], employee.email, inviteCode);
+            arr.push(mailer.sendInvite(company, employee.email, inviteCode).then(function() {
+                employee.invite_sent = true;
+                return storage.employees.save(employee);
             }).then(function() {
-                //employee.invite_sent = true;
-                //return storage.employees.save(employee);
-            }, function(err) {
-               logger.error('Unable to send invitation to employee!', employee, err);
-            }).done();
+                logger.info('Invite sent!', employee.email);
+            }));
         }
-    });
-});
+
+        return arr;
+    }, []));
+}
 
 var jwtEnforcer = utils.mws.jwtEnforcer();
 
@@ -57,22 +68,39 @@ function saveCompany(req, res, next) {
         company.user_password = bcrypt.hashSync(req.body.user_password, salt);
     }
 
-    // TODO check if company is disabled and use company_id; otherwise it will conflict (409)
+    var initPromise = Q();
+
+    if(!req.company) {
+        // check if company is disabled and use company_id; otherwise it will conflict (409)
+        initPromise = storage.companies.getByUserEmail(company.user_email, true).then(function(companyRes) {
+            if(companyRes && companyRes.rows && companyRes.rows.length > 0) {
+                company.company_id = companyRes.rows[0].company_id;
+            }
+        });
+    }
     
-    return storage.db.begin().then(function(trans) {
+    return initPromise.then(function() {
+        return storage.db.begin();
+    }).then(function(trans) {
         // save team
         return storage.companies.save(company, trans).then(function(newCompany) {
             company.company_id = newCompany.rows[0].company_id;
             if(company.employees) {
                 // save employees
-                return storage.employees.replace(company.company_id, company.employees, trans).then(function(employeeRes) {
-                    company.employees = employeeRes.rows;
-                });
+                return storage.employees.replace(company.company_id, company.employees, trans);
             }
         }).then(trans.commit, function(err) {
             trans.rollback().done();
             throw err;
         });
+    }).then(function(transRes) {
+        if(transRes.length <= 1) {
+            company.employees = [];
+            return;
+        }
+        company.employees = transRes[transRes.length - 1].rows;
+        fillInviteCodes(company.employees);
+        return sendInvites(company, company.employees);
     }).then(function() {
         delete company.user_password;
         res.status(200).json({
@@ -89,6 +117,7 @@ router.get('/:companyId', jwtEnforcer, function(req, res, next) {
         next({ status: 404 });
     } else {
         delete req.company.user_password;
+        req.company.employees = fillInviteCodes(req.company.employees);
         res.status(200).json(req.company).end();
     }
 });

@@ -1,5 +1,8 @@
 const path = require('path')
 const webpack = require('webpack')
+const definePlugin = new webpack.DefinePlugin({
+  'process.env.API_ROOT': '\'\''
+})
 
 const extractTextPlugin = require('extract-text-webpack-plugin')
 const optimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin')
@@ -16,11 +19,15 @@ module.exports = {
     loaders: [
       {
         test: /\.woff2?|\.ttf|\.eot|\.svg/,
-        loader: 'file?name=/fonts/[name].[ext]'
+        loader: 'file?name=fonts/[name].[ext]'
       },
       {
         test: /\.html|\.csv/,
         loader: 'file?name=[name].[ext]'
+      },
+      {
+        test: /\.png/,
+        loader: 'file?images/[name].[ext]'
       },
       {
         test: /\.s?css$/,
@@ -35,6 +42,7 @@ module.exports = {
     ],
   },
   plugins: [
+    definePlugin,
     new extractTextPlugin("styles.css"),
     new optimizeCssAssetsPlugin({
       assetNameRegExp: /\.css$/g,
@@ -46,7 +54,7 @@ module.exports = {
   sassLoader: {
     includePaths: [
       path.resolve(__dirname, './stylesheets'),
-      path.resolve(__dirname, './node_modules/bootstrap-sass/assets/stylesheets')
+      path.resolve(__dirname, '../node_modules/bootstrap-sass/assets/stylesheets')
     ],
   },
 };

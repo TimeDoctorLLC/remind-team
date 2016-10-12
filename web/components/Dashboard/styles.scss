@@ -20,4 +20,12 @@
     p.empty {
         margin-bottom: 30px;
     }
+
+    .invite-link {
+        text-decoration: none;
+    }
+    .invite-link::after {
+        font-family: 'Glyphicons Halflings';
+        content: '\e205';
+    }
 }

@@ -15,7 +15,7 @@ var transporter = nodemailer.createTransport(sendmailTransport(process.env.SENDM
     path: process.env.SENDMAIL_PATH
 } : null));
 
-var ORIGIN = process.env.DU_ORIGIN || 'https://www.goalreminder.com';
+var ORIGIN = process.env.API_ROOT || 'https://www.goalreminder.com';
 var WELCOME_FROM = process.env.MAIL_SENDER || 'support@goalreminder.com';
 var WELCOME_SUBJECT = 'Goal Reminder is Ready';
 

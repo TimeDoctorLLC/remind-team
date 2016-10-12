@@ -8,11 +8,11 @@ winston.emitErrs = true;
 module.exports = (function() {
     
     return {
-        bot: new winston.Logger({
+        scheduler: new winston.Logger({
             transports: [
                 new winston.transports.File({
                     level: 'info',
-                    filename: process.env.LOG_DIR || '../logs/' + (process.env.NODE_ENV == 'production' ? 'prod' : 'dev') + '-bot.log',
+                    filename: process.env.LOG_DIR || '../logs/' + (process.env.NODE_ENV == 'production' ? 'prod' : 'dev') + '-scheduler.log',
                     handleExceptions: true,
                     json: true,
                     maxsize: 5242880, //5MB
@@ -53,6 +53,26 @@ module.exports = (function() {
                 new winston.transports.File({
                     level: 'info',
                     filename: process.env.LOG_DIR || '../logs/' + (process.env.NODE_ENV == 'production' ? 'prod' : 'dev') + '-api.log',
+                    handleExceptions: true,
+                    json: true,
+                    maxsize: 5242880, //5MB
+                    maxFiles: 10,
+                    colorize: false
+                }),
+                new winston.transports.Console({
+                    level: 'debug',
+                    handleExceptions: true,
+                    json: false,
+                    colorize: true
+                })
+            ],
+            exitOnError: false
+        }),
+        web: new winston.Logger({
+            transports: [
+                new winston.transports.File({
+                    level: 'info',
+                    filename: process.env.LOG_DIR || '../logs/' + (process.env.NODE_ENV == 'production' ? 'prod' : 'dev') + '-web.log',
                     handleExceptions: true,
                     json: true,
                     maxsize: 5242880, //5MB

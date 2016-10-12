@@ -1,11 +1,18 @@
-var Q = require('Q');
+"use strict";
 
-console.log('SW-Started', self);
+require('../public/icon.png');
+
+const Dexie = require('dexie');
+
+console.debug('SW-Started', self);
+
+const db = new Dexie('GoalReminderDb');
+db.version(1).stores({ data: 'id,company_id,email,code,goals' });
 
 function notify(title, options) {
     if (!(self.Notification && self.Notification.permission === 'granted')) {
-        console.log('SW-NoPermission', self.Notification.permission);
-        return Q(); 
+        console.info('SW-NoPermission', self.Notification.permission);
+        return Promise.resolve(); 
     }
 
     if(self.registration.showNotification) {
@@ -13,27 +20,83 @@ function notify(title, options) {
     }
 
     var notification = new Notification(title, options);
-    return Q();
+    return Promise.resolve();
 }
+
+self.addEventListener('message', function(event) {
+    console.debug('SW-Message', event);
+    const data = event.data;
+
+    if(!data.employee) {
+        console.info('SW-IgnoringMsgEvent', data);
+        return;
+    }
+
+    event.waitUntil(
+        // pre-load our local database with the initial goal data
+        db.transaction('rw', db.data, function*() {
+            yield db.data.clear();
+            yield db.data.add({id: data.employee.employee_id, company_id: data.employee.company_id, email: data.employee.email, code: data.code, goals: data.employee.goals });
+            console.debug('SW-SavedData', data);
+        }).catch(e => {
+            console.error('SW-UnableToSaveInitialData', e);
+        })
+    );
+});
 
 self.addEventListener('install', function(event) {
     self.skipWaiting();
-    console.log('SW-Installed', event);
+    console.debug('SW-Installed', event);
 });
 
 self.addEventListener('activate', function(event) {
-    console.log('SW-Activated', event);
+    console.debug('SW-Activated', event);
     self.clients.claim();
+
+    event.waitUntil(
+    notify('Welcome to Goal Reminder!', {
+      'body': 'You\'ll now get goal reminders from your team.',
+      'icon': 'images/icon.png'
+    }));
 });
 
 self.addEventListener('push', function(event) {
-  console.log('Push message', event);
+    // gcm notification received, so we must retrieve the goals and show the notific.
+    console.debug('SW-GCM!', event, db, db.data);
 
-  var title = 'Push message';
+    event.waitUntil(db.data.toArray().then(function(data) {
+        data = data[0];
 
-  event.waitUntil(
-    notify(title, {
-      'body': 'The Message',
-      'icon': 'images/icon.png'
+        var request = new Request('/api/v1/employees/poll', {
+            method: 'POST', 
+            body: JSON.stringify({ code: data.code })
+        });
+        request.headers.set('Content-Type', 'application/json');
+
+        // fetch the updated data (goals)
+        return fetch(request).then(function(response) {
+            return response.json();
+        }).then(function(goals) {
+            data.goals = goals;
+            return db.data.put(data).then(function() { return data.goals; });  
+        }).catch(e => {
+            console.error('SW-UnableToFetchGoals', e);
+            return data.goals;
+        });
+
+    }).then(function(goals) {
+        // show the goals notification
+        var title = 'Here are your goals:';
+        for(var i=0; i < goals.length; i++) {
+            goals[i] = '- ' + goals[i];
+        }
+        var msg = goals.join('\n');
+
+        return notify(title, {
+            'body': msg,
+            'icon': 'images/icon.png'
+        });
+    }).catch(e => {
+        console.error('SW-UnableToShowGoals', e);
     }));
 });

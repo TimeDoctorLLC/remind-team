@@ -1,5 +1,4 @@
 require('./public/index.html')
-require('./public/template.csv')
 
 import _ from 'underscore'
 
