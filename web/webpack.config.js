@@ -22,7 +22,7 @@ module.exports = {
         loader: 'file?name=fonts/[name].[ext]'
       },
       {
-        test: /\.html|\.csv/,
+        test: /\.html|\.csv|\.json/,
         loader: 'file?name=[name].[ext]'
       },
       {

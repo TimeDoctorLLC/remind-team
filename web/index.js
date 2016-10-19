@@ -1,4 +1,5 @@
 require('./public/index.html')
+require('./public/manifest.json')
 
 import _ from 'underscore'
 
