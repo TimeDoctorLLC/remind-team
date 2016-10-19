@@ -14,14 +14,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/TimeDoctorLLC/GoalReminder.git"
+    "url": "git+https://github.com/TimeDoctorLLC/remind-team.git"
   },
   "author": "",
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/TimeDoctorLLC/GoalReminder/issues"
+    "url": "https://github.com/TimeDoctorLLC/remind-team/issues"
   },
-  "homepage": "https://github.com/TimeDoctorLLC/GoalReminder#readme",
+  "homepage": "https://github.com/TimeDoctorLLC/remind-team#readme",
   "devDependencies": {
     "mocha": "~2.2.5",
     "chai": "~3.5.0",

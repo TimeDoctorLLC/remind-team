@@ -1,5 +1,10 @@
 var debug = require('debug')('web-mailer');
 
+if(!process.env.MAIL_WEBSITE || !process.env.MAIL_SENDER) {
+    console.error('Must supply environment variables MAIL_WEBSITE and MAIL_SENDER');
+    process.exit(1);
+} 
+
 var Q = require('q');
 var _ = require('underscore');
 
@@ -15,8 +20,8 @@ var transporter = nodemailer.createTransport(sendmailTransport(process.env.SENDM
     path: process.env.SENDMAIL_PATH
 } : null));
 
-var ORIGIN = process.env.API_ROOT || 'https://www.goalreminder.com';
-var WELCOME_FROM = process.env.MAIL_SENDER || 'support@goalreminder.com';
+var ORIGIN = process.env.MAIL_WEBSITE || 'https://www.remindteam.com';
+var WELCOME_FROM = process.env.MAIL_SENDER;
 var WELCOME_SUBJECT = 'Goal Reminder is Ready';
 
 var templates = {};
