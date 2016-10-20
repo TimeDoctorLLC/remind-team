@@ -138,7 +138,7 @@ module.exports = function(db, eventTracker) {
                 del: _.reduce(employeeRes.rows, function(arr, employee) {
                     for(var i=0; i < employees.length; i++) {
                         if(employees[i].email.trim() == employee.email) {
-                            return;
+                            return arr;
                         }
                     }
                     arr.push(employee);
