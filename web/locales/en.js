@@ -53,7 +53,7 @@ export default {
             toAcceptTheInvitation: '<strong>To accept the invitation, please allow the request for notifications.</strong> This app only works in Google Chrome.',
 
             notificationsBlocked: 'Notifications for Goal Reminder are blocked. The invitation won\'t be accepted if notifications are not allowed.',
-            pleaseAllowNotifications: 'Please allow notifications in order to continue.',
+            pleaseAllowNotifications: 'Waiting for you to allow notifications',
             enablingNotifications: 'Enabling notifications...',
             youAreAllSet: 'You\'re all set! Thank You!',
             errorConfirmingInvitation: 'Oops! There was an error while confiming the invitation.'

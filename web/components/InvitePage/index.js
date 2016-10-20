@@ -67,7 +67,7 @@ const initServiceWorker = (t) => {
       t.props.stopLoading();
   }).catch(function(error) {
       t.setState({ status: error.toString() });
-      console.error('Service Worker Error :^(', error);
+      console.error('Service Worker Error', error);
       t.props.stopLoading();
   });  
 };
@@ -77,7 +77,7 @@ function isSupported() {
 }
 
 export default _.present(render, {
-  setInitialState: function() {
+  getInitialState: function() {
     return {
       status: window.Notification && window.Notification.permission === 'granted' ? 'yes' : 'asked'
     };
@@ -85,8 +85,10 @@ export default _.present(render, {
   componentDidMount: function() {
     if (isSupported()) {
       if(window.Notification.permission !== "granted") {
+        this.props.startLoading();
         window.Notification.requestPermission().then((result) => {
           if (result === 'denied' || result === 'default') {
+            this.props.stopLoading();
             this.setState({ status: 'denied' });
             return;
           }

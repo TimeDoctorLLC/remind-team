@@ -14,7 +14,7 @@ const mapDispatchToProps = (dispatch) => ({
       dispatch(actions.acceptInvite(code, gcmId))
     },
     startLoading: function() {
-        dispatch(actions.registerLoadingOperation('INVITE_LOADING', {}));
+        dispatch(actions.registerLoadingOperation('INVITE_LOADING', { op: 'setup-gcm' }));
     },
     stopLoading: function() {
         dispatch(actions.clearLoadingOperation('INVITE_LOADING'));
