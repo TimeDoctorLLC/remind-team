@@ -80,26 +80,27 @@ const intervals = [{ label: '1 min', value: 60 }].concat(__.map(__.range(1, 25),
   };
 }));
 
-const csvTemplate = [
-  ['email', 'goal1', 'goal2', 'goal3', 'goal4', 'goal5', 'do not remove this header row'],
-  ['someone@replace.me', 'this is just an example goal', 'other goals are optional']
-];
+let csvTemplate = null;
 
-const render = (ctx) => {
+const render = (ctx, t) => {
+  csvTemplate = [
+    [t('csv.email'), t('csv.goal', { index: 1 }), t('csv.goal', { index: 2 }), t('csv.goal', { index: 3 }), t('csv.goal', { index: 4 }), t('csv.goal', { index: 5 }), t('csv.doNotRemoveHeader')],
+    [t('csv.exEmail'), t('csv.exGoal1'), t('csv.exGoal2')]
+  ];
   
   if(ctx.company.employees.length > 0 || ctx.employeesOrder.length > 0) {
     return (
       <div className="dashboard">
-        <p className="lead">You currently have {ctx.company.employees ? ctx.company.employees.length : 0} active team members</p>
+        <p className="lead">{t('dashboard.youCurrentlyHaveMembers', { count: ctx.company.employees ? ctx.company.employees.length : 0 })}</p>
         <p>
-          <CSVLink className="btn btn-info" data={ctx.getCsv}>Download CSV</CSVLink> 
-          <input id="upload-csv-input" type="file" name="csv" accept=".csv" ref="csvFile" onChange={ctx.onUploadCsvChange} /> <a className="btn btn-info" href="#" onClick={ctx.onUploadCsv}>Upload CSV</a>
+          <CSVLink className="btn btn-info" data={ctx.getCsv}>{t('dashboard.downloadCsv')}</CSVLink> 
+          <input id="upload-csv-input" type="file" name="csv" accept=".csv" ref="csvFile" onChange={ctx.onUploadCsvChange} /> <a className="btn btn-info" href="#" onClick={ctx.onUploadCsv}>{t('dashboard.uploadCsv')}</a>
         </p>
 
         <hr />
         
         <div className="goal-interval-group form-group">
-          <label htmlFor="goal-interval" className="control-label">Goal Reminder Interval</label>
+          <label htmlFor="goal-interval" className="control-label">{t('dashboard.reminderInterval')}</label>
           <div>
             <select id="goal-interval" className="form-control" ref="notification_interval" defaultValue={ctx.company.notification_interval}>
               {intervals.map((i) => (
@@ -117,9 +118,9 @@ const render = (ctx) => {
             <table className="table table-striped">
             <thead>
               <tr>
-                <th>Email</th>
-                <th>Status</th>
-                <th>Invitation Link</th>
+                <th>{t('dashboard.email')}</th>
+                <th>{t('dashboard.status')}</th>
+                <th>{t('dashboard.invitationLink')}</th>
               </tr>
             </thead>
             <tbody>
@@ -129,8 +130,8 @@ const render = (ctx) => {
                   return (
                     <tr key={employee.email}>
                       <td>{employee.email}</td>
-                      <td>{employee.invite_sent ? (employee.invite_accepted ? (<span className="label label-success">Done!</span>) : (<span className="label label-info">Waiting Registration</span>)) : (<span className="label label-warning">Invite Not Sent</span>)}</td>
-                      <td>{employee.invite_code ? (<a onClick={ctx.onLinkCopy} href={'/invite/' + employee.invite_code} className="invite-link">Copy </a>) : (<span className="not-saved label label-warning">Not Saved</span>)}</td>
+                      <td>{employee.invite_sent ? (employee.invite_accepted ? (<span className="label label-success">{t('dashboard.statusDone')}</span>) : (<span className="label label-info">{t('dashboard.statusWaiting')}</span>)) : (<span className="label label-warning">{t('dashboard.statusInviteNotSent')}</span>)}</td>
+                      <td>{employee.invite_code ? (<a onClick={ctx.onLinkCopy} href={'/invite/' + employee.invite_code} className="invite-link">{t('dashboard.copy')} </a>) : (<span className="not-saved label label-warning">{t('dashboard.notSaved')}</span>)}</td>
                     </tr>
                   )
                 })
@@ -140,13 +141,13 @@ const render = (ctx) => {
           ) 
           :
           (
-            <p className="empty"><strong>No team members!</strong><br />Saving will cause Goal Reminder to stop sending notifications for all of the previously registered team members.</p>
+            <p className="empty">{t('dashboard.noTeamMembers')}</p>
           )
         }
 
         <div>
-          <div className="pull-left"><a className="btn btn-success" onClick={ctx.onSave}>Save</a></div>
-          <div className="pull-right"><a className="btn btn-default" onClick={ctx.onRefresh}><span className="glyphicon glyphicon-refresh" aria-hidden="true"></span> Refresh</a></div>
+          <div className="pull-left"><a className="btn btn-success" onClick={ctx.onSave}>{t('dashboard.save')}</a></div>
+          <div className="pull-right"><a className="btn btn-default" onClick={ctx.onRefresh}><span className="glyphicon glyphicon-refresh" aria-hidden="true"></span> {t('dashboard.refresh')}</a></div>
         </div>
       </div>
     );
@@ -154,10 +155,10 @@ const render = (ctx) => {
 
   return (
     <div className="dashboard">
-      <p className="lead">To get started <strong>download this template CSV</strong> and use it to <strong>add all of your team members</strong>, their email and their top 1-5 goals. You can enter a maximum of five goals per person but one goal is also ok.</p>
+      <p className="lead">{t('dashboard.toGetStarted')}</p>
       <p>
-        <CSVLink className="btn btn-info" data={csvTemplate}>Download CSV</CSVLink> 
-        <input id="upload-csv-input" type="file" name="csv" accept=".csv" ref="csvFile" onChange={ctx.onUploadCsvChange} /> <a className="btn btn-info" href="#" onClick={ctx.onUploadCsv}>Upload CSV</a>
+        <CSVLink className="btn btn-info" data={csvTemplate}>{t('dashboard.downloadCsv')}</CSVLink> 
+        <input id="upload-csv-input" type="file" name="csv" accept=".csv" ref="csvFile" onChange={ctx.onUploadCsvChange} /> <a className="btn btn-info" href="#" onClick={ctx.onUploadCsv}>{t('dashboard.uploadCsv')}</a>
       </p>
     </div>
   )
@@ -260,9 +261,9 @@ export default _.present(render, {
     e.preventDefault();
     this.props.clearAlert('CLIPBOARD');
     if(copyToClipboard($(e).prop('href'))) {
-      this.props.registerAlert('CLIPBOARD', 'msg', 'Invite link copied to clipboard!');
+      this.props.registerAlert('CLIPBOARD', 'msg', this.context.i18n.t('dashboard.inviteLinkCopied'));
     } else {
-      this.props.registerAlert('CLIPBOARD', 'error', 'Unable to copy to clipboard!');
+      this.props.registerAlert('CLIPBOARD', 'error', this.context.i18n.t('dashboard.unableToCopy'));
     }
   }
 });

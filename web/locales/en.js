@@ -1,0 +1,82 @@
+export default {
+    translation: {
+        globals: {
+            appName: 'Goal Reminder',
+            appNameApp: '$t(globals.appName) App',
+            appDescription: 'Easily remind your company team members of their goals',
+            signOut: 'Sign Out',
+            signIn: 'Sign In',
+            signUp: 'Sign Up',
+            or: 'or'
+        },
+        
+        enroll: {
+            email: 'Email',
+            password: 'Password',
+            name: 'Name'
+        },
+        
+        csv: {
+            goal: 'goal{{index}}',
+            email: 'email',
+            doNotRemoveHeader: 'do not remove this header row',
+            exEmail: 'someone@replace.me',
+            exGoal1: 'this is just an example goal',
+            exGoal2: 'other goals are optional'
+        },
+        
+        dashboard: {
+            youCurrentlyHaveMembers: 'You currently have {{count}} active team member',
+            youCurrentlyHaveMembers_plural: 'You currently have {{count}} active team members',
+            downloadCsv: 'Download CSV',
+            uploadCsv: 'Upload CSV',
+            reminderInterval: 'Goal Reminder Interval',
+            email: 'Email',
+            status: 'Status',
+            invitationLink: 'Invitation Link',
+            statusDone: 'Done!',
+            statusWaiting: 'Waiting Registration',
+            statusInviteNotSent: 'Invite Not Sent',
+            copy: 'Copy',
+            notSaved: 'Not Saved',
+            noTeamMembers: '<strong>No team members!</strong><br />Saving will cause $t(globals.appName) to stop sending notifications for all of the previously registered team members.',
+            save: 'Save',
+            refresh: 'Refresh',
+            toGetStarted: 'To get started <strong>download this template CSV</strong> and use it to <strong>add all of your team members</strong>, their email and their top 1-5 goals. You can enter a maximum of five goals per person but one goal is also ok.',
+            inviteLinkCopied: 'Invite link copied to clipboard!',
+            unableToCopy: 'Unable to copy to clipboard!'
+        },
+
+        invites: {
+            youHaveBeenInvited: 'You\'ve been invited to $t(globals.appName)!',
+            frequentlySendsYou: '$t(globals.appName) frequently sends you notifications with all the goals established for you.',
+            toAcceptTheInvitation: '<strong>To accept the invitation, please allow the request for notifications.</strong> This won\'t be necessary if you have already done it before.',
+
+            notificationsBlocked: 'Notifications for Goal Reminder are blocked. The invitation won\'t be accepted if notifications are not allowed.',
+            pleaseAllowNotifications: 'Please allow notifications in order to continue.',
+            enablingNotifications: 'Enabling notifications...',
+            youAreAllSet: 'You\'re all set! Thank You!',
+            errorConfirmingInvitation: 'Oops! There was an error while confiming the invitation.'
+        },
+
+        nav: {
+            toggleNavigation: 'Toggle navigation'
+        },
+        
+        errors: {
+            goHome: 'Go Home',
+            '404': {
+                title: 'Oops! 404, page not found.',
+                message: 'Sorry about that, but the page you are looking for is not available anymore.'
+            },
+            '401': {
+                title: 'Resource requires authorized access.', 
+                message: 'Your authentication might have expired or be invalid.<br />If you think something is broken, report a problem.'
+            },
+            '500': {
+                title: 'Looks like we\'re having some server issues.', 
+                message: 'Go back to the previous page and try again.<br />If you think something is broken, report a problem.' 
+            }
+        }
+    }
+}

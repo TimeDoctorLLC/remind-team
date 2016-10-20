@@ -6,6 +6,8 @@ import SignIn from '../SignIn'
 import NavBar from '../NavBar'
 import Loading from '../Loading'
 
+import I18nextProvider from '../i18n'
+
 const render = (ctx) => {
     let alertError = null;
     let alertMsg = null;
@@ -41,6 +43,7 @@ const render = (ctx) => {
     const dismissLink = alertError || alertMsg ? (<a href="#" className="dismiss" onClick={ctx.dismiss}>Dismiss</a>) : null;
 
     return (
+        <I18nextProvider>
         <div id="root">
             {ctx.company ? (
                 <NavBar active={ctx.location.pathname == "/" ? 1 : 2} username={ctx.company.user_name} onSignOut={ctx.onSignOut} showProgress={ctx.loading} />
@@ -50,6 +53,7 @@ const render = (ctx) => {
             { dismissLink }
             { ctx.props.children }
         </div>
+        </I18nextProvider>
     );
 }
 

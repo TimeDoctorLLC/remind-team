@@ -5,10 +5,10 @@ import __ from 'underscore'
 
 import SignUp from '../SignUp'
 
-const render = (ctx) => (
+const render = (ctx, t) => (
   <div className="index">
-      <h1>Goal Reminder App</h1>
-      <p className="lead">Easily remind your company team members of their goals.</p>
+      <h1>{t('globals.appNameApp')}</h1>
+      <p className="lead">{t('globals.appDescription')}</p>
       <SignUp onSignUp={ctx.onSignUp} />
     </div>
 )

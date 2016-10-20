@@ -3,23 +3,23 @@ import React from 'react'
 import superagent from 'superagent'
 import _ from '../utils'
 
-const render = (ctx) => (
+const render = (ctx, t) => (
   <div className="invite-page">
-    <h1>You've been invited to Goal Reminder!</h1>
-    <p className="lead">Goal Reminder frequently sends you notifications with all the goals established for you.</p>
-    <p><strong>To accept the invitation, please allow the request for notifications.</strong> This won't be necessary if you have already done it before.</p>
+    <h1>{t('invites.youHaveBeenInvited')}</h1>
+    <p className="lead">{t('invites.frequentlySendsYou')}</p>
+    <p>{t('invites.toAcceptTheInvitation')}</p>
 
     <div className="alert-panel">
   {
     ctx.status === 'denied' ?
-      (<div className="alert alert-warning">Notifications for Goal Reminder are blocked. The invitation won't be accepted if notifications are not allowed.</div>) :
+      (<div className="alert alert-warning">{t('invites.notificationsBlocked')}</div>) :
     (ctx.status === 'asked' ? 
-      (<div className="alert alert-info">Please allow notifications in order to continue.</div>) :
+      (<div className="alert alert-info">{t('invites.pleaseAllowNotifications')}</div>) :
     (ctx.status === 'yes' ?
-      (<div className="alert alert-info">Enabling notifications...</div>) :
+      (<div className="alert alert-info">{t('invites.enablingNotifications')}</div>) :
     (ctx.status === 'done' ? 
-      (<div className="alert alert-success">You're all set! Thank You!</div>) :
-      (<div className="alert alert-danger">Oops! There was an error while confiming the invitation.<br/>{ctx.status}</div>)
+      (<div className="alert alert-success">{t('invites.youAreAllSet')}</div>) :
+      (<div className="alert alert-danger">{t('invites.errorConfirmingInvitation')}<br/>{ctx.status}</div>)
     )))
   }
     </div>
