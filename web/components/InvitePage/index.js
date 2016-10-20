@@ -52,7 +52,7 @@ const initServiceWorker = (t) => {
       // send the GCM registration id to the server and accept the invite
       return superagent.post((process.env.API_ROOT || '') + '/api/v1/companies/invite').type('json').send({ 
         code: t.props.params.code, 
-        gcm_id: sub.endpoint.substring(40) 
+        gcm_id: sub.endpoint.substring(sub.endpoint.lastIndexOf('/') + 1) 
       }).set('Accept', 'application/json');
   }).then(function(res) {
       console.debug('Invite-ServerResponse', res);
