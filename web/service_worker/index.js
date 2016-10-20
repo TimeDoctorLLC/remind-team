@@ -1,8 +1,21 @@
-"use strict";
-
 require('../public/icon.png');
 
+import i18next from 'i18next';
+import resources from '../locales';
+
 const Dexie = require('dexie');
+
+i18next.init({
+    interpolation: {
+        escapeValue: false
+    },
+    lng: 'en',
+    resources: resources
+}, (err, t) => {
+    if(err) {
+        console.error('Unable to initialize i18n!', err);
+    }
+});
 
 console.debug('SW-Started', self);
 
@@ -54,8 +67,8 @@ self.addEventListener('activate', function(event) {
     self.clients.claim();
 
     event.waitUntil(
-    notify('Welcome to Goal Reminder!', {
-      'body': 'You\'ll now get goal reminders from your team.',
+    notify(i18next.t('notifications.welcome.title'), {
+      'body': i18next.t('notifications.welcome.message'),
       'icon': 'images/icon.png'
     }));
 });
@@ -86,14 +99,13 @@ self.addEventListener('push', function(event) {
 
     }).then(function(goals) {
         // show the goals notification
-        var title = 'Here are your goals:';
         for(var i=0; i < goals.length; i++) {
             goals[i] = '- ' + goals[i];
         }
         var msg = goals.join('\n');
 
-        return notify(title, {
-            'body': msg,
+        return notify(i18next.t('notifications.reminder.title'), {
+            'body': i18next.t('notifications.reminder.message', { goal: msg }),
             'icon': 'images/icon.png'
         });
     }).catch(e => {

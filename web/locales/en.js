@@ -1,13 +1,25 @@
 export default {
     translation: {
         globals: {
-            appName: 'Remindteam.com',
+            appName: 'RemindTeam.com',
             appNameApp: '$t(globals.appName)',
             appDescription: 'Easily remind your company team members of their goals',
+            appSupportEmail: 'support@remindteam.com',
             signOut: 'Sign Out',
             signIn: 'Sign In',
             signUp: 'Sign Up',
             or: 'or'
+        },
+
+        notifications: {
+            welcome: {
+                title: 'Welcome to RemindTeam.com',
+                message: 'You\'ll now get reminders from your team.\nFeedback at $t(globals.appSupportEmail)'
+            },
+            reminder: {
+                title: 'Here are your goals:',
+                message: '{{goal}}'
+            }
         },
         
         enroll: {
@@ -30,7 +42,7 @@ export default {
             youCurrentlyHaveMembers_plural: 'You currently have {{count}} active team members',
             downloadCsv: 'Download CSV',
             uploadCsv: 'Upload CSV',
-            reminderInterval: 'Goal Reminder Interval',
+            reminderInterval: 'Reminder Interval',
             email: 'Email',
             status: 'Status',
             invitationLink: 'Invitation Link',
