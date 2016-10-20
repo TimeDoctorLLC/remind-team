@@ -15,10 +15,6 @@ export default {
             welcome: {
                 title: 'Welcome to RemindTeam.com',
                 message: 'You\'ll now get reminders from your team.\nFeedback at $t(globals.appSupportEmail)'
-            },
-            reminder: {
-                title: 'Here are your goals:',
-                message: '{{goal}}'
             }
         },
         

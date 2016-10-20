@@ -22,6 +22,8 @@ console.debug('SW-Started', self);
 const db = new Dexie('GoalReminderDb');
 db.version(1).stores({ data: 'id,company_id,email,code,goals' });
 
+let reminderIndex = -1;
+
 function notify(title, options) {
     if (!(self.Notification && self.Notification.permission === 'granted')) {
         console.info('SW-NoPermission', self.Notification.permission);
@@ -99,13 +101,17 @@ self.addEventListener('push', function(event) {
 
     }).then(function(goals) {
         // show the goals notification
-        for(var i=0; i < goals.length; i++) {
-            goals[i] = '- ' + goals[i];
+        reminderIndex++;
+        if(reminderIndex >= goals.length) {
+            reminderIndex = 0;
         }
-        var msg = goals.join('\n');
 
-        return notify(i18next.t('notifications.reminder.title'), {
-            'body': i18next.t('notifications.reminder.message', { goal: msg }),
+        if(goals.length <= 0) {
+            console.warn('No goals/reminders found!');
+            return;
+        }
+
+        return notify(goals[reminderIndex], {
             'icon': 'images/icon.png'
         });
     }).catch(e => {
