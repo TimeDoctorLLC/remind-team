@@ -20,7 +20,7 @@ var transporter = nodemailer.createTransport(sendmailTransport(process.env.SENDM
     path: process.env.SENDMAIL_PATH
 } : null));
 
-var ORIGIN = process.env.MAIL_WEBSITE || 'https://www.remindteam.com';
+var ORIGIN = process.env.MAIL_WEBSITE;
 var WELCOME_FROM = process.env.MAIL_SENDER;
 var WELCOME_SUBJECT = 'Goal Reminder is Ready';
 
@@ -73,7 +73,8 @@ mailer.sendInvite = function(company, email, code) {
         return transporter.sendMail({
             to: email,
             from: WELCOME_FROM,
-            subject: company.user_name + ' has invited you to Goal Reminder',
+            replyTo: '"' + company.user_name + '" <' + company.user_email + '>',
+            subject: company.user_name + ' has invited you to Remindteam.com',
             html: html
         });
     });
