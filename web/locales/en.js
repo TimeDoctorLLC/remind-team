@@ -42,7 +42,7 @@ export default {
             noTeamMembers: '<strong>No team members!</strong><br />Saving will cause $t(globals.appName) to stop sending notifications for all of the previously registered team members.',
             save: 'Save',
             refresh: 'Refresh',
-            toGetStarted: 'To get started <strong>download this template CSV</strong> and use it to <strong>add all of your team members</strong>, their email and their top 1-5 goals. You can enter a maximum of five goals per person but one goal is also ok.',
+            toGetStarted: 'To get started <strong>download this template CSV</strong> and use it to <strong>add all of your team members</strong>, their email and the top 1-5 things you want to remind them of. You can enter a maximum of five items per person.',
             inviteLinkCopied: 'Invite link copied to clipboard!',
             unableToCopy: 'Unable to copy to clipboard!'
         },
