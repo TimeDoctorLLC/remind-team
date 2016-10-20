@@ -1,8 +1,8 @@
 export default {
     translation: {
         globals: {
-            appName: 'Goal Reminder',
-            appNameApp: '$t(globals.appName) App',
+            appName: 'Remindteam.com',
+            appNameApp: '$t(globals.appName)',
             appDescription: 'Easily remind your company team members of their goals',
             signOut: 'Sign Out',
             signIn: 'Sign In',
@@ -49,8 +49,8 @@ export default {
 
         invites: {
             youHaveBeenInvited: 'You\'ve been invited to $t(globals.appName)!',
-            frequentlySendsYou: '$t(globals.appName) frequently sends you notifications with all the goals established for you.',
-            toAcceptTheInvitation: '<strong>To accept the invitation, please allow the request for notifications.</strong> This won\'t be necessary if you have already done it before.',
+            frequentlySendsYou: 'This app sends you daily reminders of whatever you want to focus on.',
+            toAcceptTheInvitation: '<strong>To accept the invitation, please allow the request for notifications.</strong> This app only works in Google Chrome.',
 
             notificationsBlocked: 'Notifications for Goal Reminder are blocked. The invitation won\'t be accepted if notifications are not allowed.',
             pleaseAllowNotifications: 'Please allow notifications in order to continue.',
