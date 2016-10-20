@@ -29,12 +29,11 @@ export default {
         },
         
         csv: {
-            goal: 'goal{{index}}',
+            goal: 'reminder {{index}}',
             email: 'email',
             doNotRemoveHeader: 'do not remove this header row',
-            exEmail: 'someone@replace.me',
-            exGoal1: 'this is just an example goal',
-            exGoal2: 'other goals are optional'
+            exGoal1: 'this is just an example reminder',
+            exGoal2: 'other reminders are optional'
         },
         
         dashboard: {
