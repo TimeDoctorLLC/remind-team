@@ -130,7 +130,8 @@ self.addEventListener('push', function(event) {
             return;
         }
 
-        return notify(goals[reminderIndex], {
+        return notify('', {
+            'body': goals[reminderIndex],
             'icon': 'images/icon.png'
         });
     }).catch(e => {

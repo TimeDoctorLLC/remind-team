@@ -35,7 +35,7 @@ scheduler.start = function() {
             logger.error('Unable to send goal GCM notifications!', err);
         }).done();
 
-    }, 10000); // poll every 5 min. 300000 ms
+    }, 60000); // poll every 1 min.
 };
 
 scheduler.stop = function() {
