@@ -86,8 +86,10 @@ self.addEventListener('push', function(event) {
     // gcm notification received, so we must retrieve the goals and show the notific.
     console.debug('SW-GCM!', event, db, db.data);
 
+    self.registration.update();
+
     if(processingMessage) {
-        console.info('SW-GCM: Processing message...');
+        console.warn('SW-GCM: Processing message...');
         return;
     }
 
