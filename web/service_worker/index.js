@@ -65,7 +65,8 @@ self.addEventListener('message', function(event) {
 
             return notify(i18next.t('notifications.welcome.title'), {
                 'body': i18next.t('notifications.welcome.message'),
-                'icon': 'images/icon.png'
+                'icon': 'images/icon.png',
+                'tag': 'rt-welcome'
             });
         })
     );
@@ -134,7 +135,8 @@ self.addEventListener('push', function(event) {
 
         return notify('', {
             'body': goals[reminderIndex],
-            'icon': 'images/icon.png'
+            'icon': 'images/icon.png',
+            'tag': 'rt-reminder'
         });
     }).catch(e => {
         console.error('SW-UnableToShowGoals', e);
