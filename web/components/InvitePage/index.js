@@ -61,6 +61,27 @@ const render = (ctx, t) => (
   </div>
 )
 
+const sendMessage = (ctrl, code, employee) => {
+  return new Promise(function(resolve, reject) {
+      // create a message channel
+      // we'll wait for the service worker to respond
+      var msgChannel = new MessageChannel();
+      msgChannel.port1.onmessage = function(event) {
+          if(event.data.error) {
+              reject(event.data.error);
+          } else {
+              resolve(event.data);
+          }
+      };
+
+      // send message to service worker along with port for reply
+      ctrl.postMessage({
+        code,
+        employee
+      }, [msgChannel.port2]);
+  }); 
+};
+
 const initServiceWorker = (t) => {
   let reg;
 
@@ -92,10 +113,7 @@ const initServiceWorker = (t) => {
   }).then(function(res) {
       console.debug('Invite-ServerResponse', res);
       // send the initial goal data to the worker
-      return reg.active.postMessage({
-        code: res.body.at,
-        employee: res.body.employee
-      });
+      return sendMessage(reg.active, res.body.at, res.body.employee);
   }).then(function() {
       console.debug('Invite-Done');
       t.setState({ status: 'done' });

@@ -56,9 +56,17 @@ self.addEventListener('message', function(event) {
             return db.data.put({id: data.employee.employee_id, company_id: data.employee.company_id, email: data.employee.email, code: data.code, goals: data.employee.goals });
         }).catch(e => {
             console.error('SW-UnableToSaveInitialData', e);
+            event.ports[0].postMessage({ error: e });
         }).then(data => {
             console.debug('SW-SavedData', data); 
             processingMessage = false; 
+            
+            event.ports[0].postMessage('Ok');
+
+            return notify(i18next.t('notifications.welcome.title'), {
+                'body': i18next.t('notifications.welcome.message'),
+                'icon': 'images/icon.png'
+            });
         })
     );
 });
@@ -71,12 +79,6 @@ self.addEventListener('install', function(event) {
 self.addEventListener('activate', function(event) {
     console.debug('SW-Activated', event);
     self.clients.claim();
-
-    event.waitUntil(
-    notify(i18next.t('notifications.welcome.title'), {
-      'body': i18next.t('notifications.welcome.message'),
-      'icon': 'images/icon.png'
-    }));
 });
 
 self.addEventListener('push', function(event) {
