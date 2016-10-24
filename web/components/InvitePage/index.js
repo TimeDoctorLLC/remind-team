@@ -3,9 +3,40 @@ import React from 'react'
 import superagent from 'superagent'
 import _ from '../utils'
 
+// http://stackoverflow.com/questions/4565112/javascript-how-to-find-out-if-the-user-browser-is-chrome/13348618#13348618
+function isChrome() {
+  // please note, 
+  // that IE11 now returns undefined again for window.chrome
+  // and new Opera 30 outputs true for window.chrome
+  // and new IE Edge outputs to true now for window.chrome
+  // and if not iOS Chrome check
+  // so use the below updated condition
+  var isChromium = window.chrome,
+      winNav = window.navigator,
+      vendorName = winNav.vendor,
+      isOpera = winNav.userAgent.indexOf("OPR") > -1,
+      isIEedge = winNav.userAgent.indexOf("Edge") > -1,
+      isIOSChrome = winNav.userAgent.match("CriOS");
+
+  if(isIOSChrome){
+    // is Google Chrome on IOS
+    return true;
+  } else if(isChromium !== null && isChromium !== undefined && vendorName === "Google Inc." && isOpera == false && isIEedge == false) {
+    // is Google Chrome
+    return true;
+  }
+
+  // not Google Chrome 
+  return false;
+}
+
+const isChromeCheck = isChrome();
+
 const render = (ctx, t) => (
   <div className="invite-page">
     <h1>{t('invites.youHaveBeenInvited')}</h1>
+  { isChromeCheck ? (    
+    <div>
     <p className="lead">{t('invites.frequentlySendsYou')}</p>
     <p>{t('invites.toAcceptTheInvitation')}</p>
 
@@ -23,6 +54,10 @@ const render = (ctx, t) => (
     )))
   }
     </div>
+    </div>
+  ) : (
+    <p className="lead">{t('invites.notChrome')}</p>
+  ) }
   </div>
 )
 
@@ -58,8 +93,8 @@ const initServiceWorker = (t) => {
       console.debug('Invite-ServerResponse', res);
       // send the initial goal data to the worker
       return reg.active.postMessage({
-        code: t.props.params.code,
-        employee: res.body
+        code: res.body.at,
+        employee: res.body.employee
       });
   }).then(function() {
       console.debug('Invite-Done');
@@ -83,7 +118,7 @@ export default _.present(render, {
     };
   },
   componentDidMount: function() {
-    if (isSupported()) {
+    if (isChromeCheck && isSupported()) {
       if(window.Notification.permission !== "granted") {
         this.props.startLoading();
         window.Notification.requestPermission().then((result) => {

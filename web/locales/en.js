@@ -65,7 +65,8 @@ export default {
             pleaseAllowNotifications: 'Waiting for you to allow notifications',
             enablingNotifications: 'Enabling notifications...',
             youAreAllSet: 'You\'re all set! Thank You!',
-            errorConfirmingInvitation: 'Oops! There was an error while confiming the invitation.'
+            errorConfirmingInvitation: 'Oops! There was an error while confiming the invitation.',
+            notChrome: 'This app only works in Google Chrome.<br />Can you please copy the link into Google Chrome and try again?'
         },
 
         nav: {

@@ -37,7 +37,7 @@ module.exports = function(db, eventTracker) {
     };
 
     model.getByHash = function(companyId, hash, email) {
-        var query = sql.select(RETURN_FIELDS).from(TABLE).where('company_id = $1', 'invite_hash = $2', 'email = $3').end().build();
+        var query = sql.select(RETURN_FIELDS).from(TABLE).where('company_id = $1', 'invite_hash = $2', 'email = $3', 'deactivation_ts IS NULL').end().build();
         return db.execute(query, [companyId, hash, email]);
     };
 

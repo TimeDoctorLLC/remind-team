@@ -23,6 +23,7 @@ const db = new Dexie('GoalReminderDb');
 db.version(1).stores({ data: 'id,company_id,email,code,goals' });
 
 let reminderIndex = -1;
+let processingMessage = false;
 
 function notify(title, options) {
     if (!(self.Notification && self.Notification.permission === 'granted')) {
@@ -47,14 +48,17 @@ self.addEventListener('message', function(event) {
         return;
     }
 
+    processingMessage = true;
+
     event.waitUntil(
         // pre-load our local database with the initial goal data
-        db.transaction('rw', db.data, function*() {
-            yield db.data.clear();
-            yield db.data.add({id: data.employee.employee_id, company_id: data.employee.company_id, email: data.employee.email, code: data.code, goals: data.employee.goals });
-            console.debug('SW-SavedData', data);
+        db.data.clear().then(function() {
+            return db.data.put({id: data.employee.employee_id, company_id: data.employee.company_id, email: data.employee.email, code: data.code, goals: data.employee.goals });
         }).catch(e => {
             console.error('SW-UnableToSaveInitialData', e);
+        }).then(data => {
+            console.debug('SW-SavedData', data); 
+            processingMessage = false; 
         })
     );
 });
@@ -76,11 +80,21 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('push', function(event) {
+    
     // gcm notification received, so we must retrieve the goals and show the notific.
     console.debug('SW-GCM!', event, db, db.data);
 
+    if(processingMessage) {
+        console.info('SW-GCM: Processing message...');
+        return;
+    }
+
     event.waitUntil(db.data.toArray().then(function(data) {
         data = data[0];
+
+        if(!data) {
+            return [];
+        }
 
         var request = new Request('/api/v1/employees/poll', {
             method: 'POST', 
@@ -93,7 +107,10 @@ self.addEventListener('push', function(event) {
             return response.json();
         }).then(function(goals) {
             data.goals = goals;
-            return db.data.put(data).then(function() { return data.goals; });  
+            if(!processingMessage) {
+                return db.data.put(data).then(function() { return data.goals; });
+            }  
+            return data.goals;
         }).catch(e => {
             console.error('SW-UnableToFetchGoals', e);
             return data.goals;
@@ -106,8 +123,8 @@ self.addEventListener('push', function(event) {
             reminderIndex = 0;
         }
 
-        if(goals.length <= 0) {
-            console.warn('No goals/reminders found!');
+        if(goals.length <= 0 || !goals[reminderIndex]) {
+            console.warn('No goals/reminders found!', goals);
             return;
         }
 
