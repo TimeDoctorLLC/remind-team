@@ -5,6 +5,10 @@ import resources from '../locales';
 
 const Dexie = require('dexie');
 
+const DB_NAME = 'GoalReminderDb';
+const DB_SCHEMA = { data: 'id,company_id,email,code,goals' };
+const DB_VERSION = 1;
+
 i18next.init({
     interpolation: {
         escapeValue: false
@@ -19,11 +23,7 @@ i18next.init({
 
 console.debug('SW-Started', self);
 
-const db = new Dexie('GoalReminderDb');
-db.version(1).stores({ data: 'id,company_id,email,code,goals' });
-
 let reminderIndex = -1;
-let processingMessage = false;
 
 function notify(title, options) {
     if (!(self.Notification && self.Notification.permission === 'granted')) {
@@ -41,6 +41,10 @@ function notify(title, options) {
 
 self.addEventListener('message', function(event) {
     console.debug('SW-Message', event);
+
+    const db = new Dexie(DB_NAME);
+    db.version(DB_VERSION).stores(DB_SCHEMA);
+
     const data = event.data;
 
     if(!data.employee) {
@@ -48,19 +52,16 @@ self.addEventListener('message', function(event) {
         return;
     }
 
-    processingMessage = true;
-
     event.waitUntil(
         // pre-load our local database with the initial goal data
-        db.data.clear().then(function() {
-            return db.data.put({id: data.employee.employee_id, company_id: data.employee.company_id, email: data.employee.email, code: data.code, goals: data.employee.goals });
-        }).catch(e => {
-            console.error('SW-UnableToSaveInitialData', e);
-            event.ports[0].postMessage({ error: e });
+        db.open().then(function() {
+            return db.data.clear();
+        }).then(function() {
+            return db.data.put({id: data.employee.employee_id, company_id: data.employee.company_id, email: data.employee.email, code: data.code, goals: data.employee.goals.join('\n') });
         }).then(data => {
+            db.close();
+
             console.debug('SW-SavedData', data); 
-            processingMessage = false; 
-            
             event.ports[0].postMessage('Ok');
 
             return notify(i18next.t('notifications.welcome.title'), {
@@ -68,6 +69,11 @@ self.addEventListener('message', function(event) {
                 'icon': 'images/icon.png',
                 'tag': 'rt-welcome'
             });
+        }, e => {
+            db.close();
+
+            console.error('SW-UnableToSaveInitialData', e);
+            event.ports[0].postMessage({ error: e });
         })
     );
 });
@@ -85,16 +91,16 @@ self.addEventListener('activate', function(event) {
 self.addEventListener('push', function(event) {
     
     // gcm notification received, so we must retrieve the goals and show the notific.
-    console.debug('SW-GCM!', event, db, db.data);
+    console.debug('SW-GCM!', event);
 
     self.registration.update();
 
-    if(processingMessage) {
-        console.warn('SW-GCM: Processing message...');
-        return;
-    }
+    const db = new Dexie(DB_NAME);
+    db.version(DB_VERSION).stores(DB_SCHEMA);
 
-    event.waitUntil(db.data.toArray().then(function(data) {
+    event.waitUntil(db.open().then(function() {
+        return db.data.toArray();
+    }).then(function(data) {
         data = data[0];
 
         if(!data) {
@@ -111,17 +117,16 @@ self.addEventListener('push', function(event) {
         return fetch(request).then(function(response) {
             return response.json();
         }).then(function(goals) {
-            data.goals = goals;
-            if(!processingMessage) {
-                return db.data.put(data).then(function() { return data.goals; });
-            }  
-            return data.goals;
+            data.goals = goals.join('\n');
+            return db.data.put(data).then(function() { return goals; });
         }).catch(e => {
             console.error('SW-UnableToFetchGoals', e);
-            return data.goals;
+            return data.goals ? data.goals.split('\n') : [];
         });
 
     }).then(function(goals) {
+        db.close();
+
         // show the goals notification
         reminderIndex++;
         if(reminderIndex >= goals.length) {
@@ -139,6 +144,7 @@ self.addEventListener('push', function(event) {
             'tag': 'rt-reminder'
         });
     }).catch(e => {
+        db.close();
         console.error('SW-UnableToShowGoals', e);
     }));
 });
