@@ -85,7 +85,7 @@ let csvTemplate = null;
 
 const render = (ctx, t) => {
   csvTemplate = [
-    [t('csv.email'), t('csv.goal', { index: 1 }), t('csv.goal', { index: 2 }), t('csv.goal', { index: 3 }), t('csv.goal', { index: 4 }), t('csv.goal', { index: 5 }), t('csv.doNotRemoveHeader')],
+    [t('csv.email'), t('csv.goal', { index: 1 }), t('csv.goal', { index: 2 }), t('csv.goal', { index: 3 }), t('csv.goal', { index: 4 }), t('csv.goal', { index: 5 }), t('csv.youCanAddMore'), , , , t('csv.doNotRemoveHeader')],
     [ctx.company.user_email, t('csv.exGoal1'), t('csv.exGoal2')]
   ];
   

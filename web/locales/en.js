@@ -25,9 +25,10 @@ export default {
         },
         
         csv: {
-            goal: 'reminder {{index}}',
-            email: 'email',
-            doNotRemoveHeader: 'do not remove this header row',
+            goal: 'Reminder {{index}}',
+            email: 'Email',
+            youCanAddMore: 'You can add more than 5 reminders',
+            doNotRemoveHeader: 'Do not remove this header row',
             exGoal1: 'this is just an example reminder',
             exGoal2: 'other reminders are optional'
         },
@@ -49,7 +50,7 @@ export default {
             noTeamMembers: '<strong>No team members!</strong><br />Saving will cause $t(globals.appName) to stop sending notifications for all of the previously registered team members.',
             save: 'Save',
             refresh: 'Refresh',
-            toGetStarted: 'To get started <strong>download this template CSV</strong> and use it to <strong>add all of your team members</strong>, their email and the top 1-5 things you want to remind them of. You can enter a maximum of five items per person.',
+            toGetStarted: 'To get started <strong>download this template CSV</strong> and use it to <strong>add all of your team members</strong>, their email and the top few things you want to remind them of.',
             inviteLinkCopied: 'Invite link copied to clipboard!',
             unableToCopy: 'Unable to copy to clipboard!',
             csvErrorEmptyLine: 'Please make sure there are no empty lines or email addresses in your CSV',
