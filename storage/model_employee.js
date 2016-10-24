@@ -129,6 +129,18 @@ module.exports = function(db, eventTracker) {
     };
 
     model.replace = function(companyId, employees, trans) {
+        // avoid empty data
+        employees = _.reduce(employees, function(arr, employee) {
+            if(!employee.email.trim() || !employee.goals || !employee.goals.join('').trim()) {
+                return arr;
+            }
+            employee.goals = _.filter(employee.goals, function(goal) {
+                return goal.trim();
+            });
+            arr.push(employee);
+            return arr;
+        }, []);
+
         return model.allByCompanyId(companyId, true, trans).then(function(employeeRes) {
             return {
                 exists: _.reduce(employeeRes.rows, function(obj, employee) {

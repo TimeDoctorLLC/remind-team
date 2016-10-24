@@ -52,6 +52,7 @@ function getCSVFromFile(file) {
   var deferred = Q.defer();
 
   papa.parse(file, {
+    skipEmptyLines: true,
     complete: function(results, file) {
       if(results.errors.length > 0) {
         deferred.reject(results.errors);
@@ -92,10 +93,10 @@ const render = (ctx, t) => {
     return (
       <div className="dashboard">
         <p className="lead">{t('dashboard.youCurrentlyHaveMembers', { count: ctx.company.employees ? ctx.company.employees.length : 0 })}</p>
-        <p>
+        <form id="upload-csv-form">
           <CSVLink className="btn btn-info" data={ctx.getCsv}>{t('dashboard.downloadCsv')}</CSVLink> 
           <input id="upload-csv-input" type="file" name="csv" accept=".csv" ref="csvFile" onChange={ctx.onUploadCsvChange} /> <a className="btn btn-info" href="#" onClick={ctx.onUploadCsv}>{t('dashboard.uploadCsv')}</a>
-        </p>
+        </form>
 
         <hr />
         
@@ -156,10 +157,10 @@ const render = (ctx, t) => {
   return (
     <div className="dashboard">
       <p className="lead">{t('dashboard.toGetStarted')}</p>
-      <p>
+      <form id="upload-csv-form">
         <CSVLink className="btn btn-info" data={csvTemplate}>{t('dashboard.downloadCsv')}</CSVLink> 
         <input id="upload-csv-input" type="file" name="csv" accept=".csv" ref="csvFile" onChange={ctx.onUploadCsvChange} /> <a className="btn btn-info" href="#" onClick={ctx.onUploadCsv}>{t('dashboard.uploadCsv')}</a>
-      </p>
+      </form>
     </div>
   )
 };
@@ -222,11 +223,23 @@ export default _.present(render, {
 
       __.each(__.rest(data), function(row) {
         const email = row[0].toLowerCase().trim();
+
+        if(!email) {
+          throw t.context.i18n.t('dashboard.csvErrorEmptyLine');
+        }
+
+        // filter out empty goals
+        const goals = __.filter(__.rest(row), function(goal) { return goal.trim(); });
+
+        if(goals.length <= 0 || !goals.join('').trim()) {
+          throw t.context.i18n.t('dashboard.csvErrorNoGoals', { email });
+        }
+
         newEmployeesOrder.push(email);
         if(t.state.employeesByEmail[email]) {
-          newEmployeesByEmail[email] = Object.assign({}, t.state.employeesByEmail[email], { goals: __.rest(row) }); 
+          newEmployeesByEmail[email] = Object.assign({}, t.state.employeesByEmail[email], { goals: goals }); 
         } else {
-          newEmployeesByEmail[email] = { email, goals: __.rest(row), invite_sent: false, invite_accepted: false };
+          newEmployeesByEmail[email] = { email, goals: goals, invite_sent: false, invite_accepted: false };
         }
       });
 
@@ -234,10 +247,13 @@ export default _.present(render, {
         employeesOrder: newEmployeesOrder,
         employeesByEmail: newEmployeesByEmail
       });
-    }, function(errors) {
+    }).fail(function(errors) {
       console.error("Parsing error:", errors);
       t.props.registerAlert('CSV_ERROR', 'error', errors);
     }).done();
+
+    $('#upload-csv-form').trigger('reset');
+    //$(e).unwrap();
   },
   onSave: function(e) {
     e.preventDefault();

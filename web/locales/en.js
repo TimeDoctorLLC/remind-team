@@ -51,7 +51,9 @@ export default {
             refresh: 'Refresh',
             toGetStarted: 'To get started <strong>download this template CSV</strong> and use it to <strong>add all of your team members</strong>, their email and the top 1-5 things you want to remind them of. You can enter a maximum of five items per person.',
             inviteLinkCopied: 'Invite link copied to clipboard!',
-            unableToCopy: 'Unable to copy to clipboard!'
+            unableToCopy: 'Unable to copy to clipboard!',
+            csvErrorEmptyLine: 'Please make sure there are no empty lines or email addresses in your CSV',
+            csvErrorNoGoals: 'Please make sure there is at least one goal for {{email}}'
         },
 
         invites: {
