@@ -58,24 +58,30 @@ function renderFile(filename, data, options) {
 var mailer = {};
 
 mailer.sendWelcome = function(company) {
-    return renderFile('./api/v1/templates/mail_welcome.html', { user_name: company.user_name, origin: ORIGIN }).then(function(html) {
+    return Q.all([
+        renderFile('./api/v1/templates/mail_welcome.html', { user_name: company.user_name, origin: ORIGIN }),
+        renderFile('./api/v1/templates/mail_welcome.txt', { user_name: company.user_name, origin: ORIGIN })]).then(function(templates) {
         return transporter.sendMail({
             to: '"' + company.user_name + '" <' + company.user_email + '>',
             from: WELCOME_FROM,
             subject: WELCOME_SUBJECT,
-            html: html
+            html: templates[0],
+            text: templates[1] 
         });
     });
 };
 
 mailer.sendInvite = function(company, email, code) {
-    return renderFile('./api/v1/templates/mail_invite.html', { code: code, origin: ORIGIN }).then(function(html) {
+    return Q.all([
+        renderFile('./api/v1/templates/mail_invite.html', { code: code, origin: ORIGIN }),
+        renderFile('./api/v1/templates/mail_invite.txt', { code: code, origin: ORIGIN })]).then(function(templates) {
         return transporter.sendMail({
             to: email,
             from: WELCOME_FROM,
             replyTo: '"' + company.user_name + '" <' + company.user_email + '>',
             subject: company.user_name + ' has invited you to Remindteam.com',
-            html: html
+            html: templates[0],
+            text: templates[1]
         });
     });
 }

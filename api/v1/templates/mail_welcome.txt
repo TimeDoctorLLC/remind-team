@@ -1,0 +1,5 @@
+All Done!
+
+Your company is now ready.
+
+To set up your reminders go to {origin}

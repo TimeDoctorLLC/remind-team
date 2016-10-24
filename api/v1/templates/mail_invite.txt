@@ -1,0 +1,3 @@
+RemindTeam.com helps teams to get daily reminders of what they want to focus on.
+
+Open {origin}/invite/{code} to use RemindTeam.com
