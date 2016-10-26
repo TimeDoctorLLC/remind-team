@@ -1,6 +1,6 @@
 var debug = require('debug')('scheduler');
 var _ = require('underscore');
-var Q = require('Q');
+var Q = require('q');
 
 var logger = require('../globals/logger.js').scheduler;
 var storage = require('../storage');
