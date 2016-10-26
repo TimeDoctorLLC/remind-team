@@ -1,5 +1,6 @@
 var debug = require('debug')('scheduler');
 var _ = require('underscore');
+var Q = require('Q');
 
 var logger = require('../globals/logger.js').scheduler;
 var storage = require('../storage');
@@ -24,18 +25,39 @@ scheduler.start = function() {
             if(employeeRes && employeeRes.rows && employeeRes.rows.length > 0) {
                 return gcm.notify(_.map(employeeRes.rows, function(employee) { return employee.gcm_id; })).then(function(gcmResults) {
                     logger.info('GCM notifications sent successfully!', gcmResults);
-                    return storage.employees.updateExpired(_.map(employeeRes.rows, function(employee) { return employee.employee_id; }), ts);
+                    return { employeeRes: employeeRes, gcmResults: gcmResults.results };
+                }, function(err) {
+                    if(!err.gcm || err.code != 400) {
+                        throw err;
+                    }
+                    return { employeeRes: employeeRes, gcmResults: err.results };
                 });
             }
             logger.info('No new notifications to send!');
-            return employeeRes;
+            return Q({ gcmResults: [], employeeRes: employeeRes });
+        }).then(function(data) {
+            return Q.all(_.reduce(data.gcmResults, function(arr, result, i) {
+                if(result.error) {
+                    var employee = data.employeeRes.rows[i];
+                    if(result.error == 'NotRegistered') {
+                        employee.invite_accepted = false;
+                        employee.gcm_id = null;
+                        arr.push(storage.employees.save(employee));
+                    } else {
+                        logger.error('Unable to send GCM notification', employee, result.error);
+                    }
+                }
+                return arr;
+            }, [])).then(function() {
+                return data.employeeRes;
+            });
         }).then(function(employeeRes) {
             debug('Updated GCM Employees', employeeRes ? employeeRes.rows : []);
         }, function(err) {
-            logger.error('Unable to send goal GCM notifications!', err);
-        }).done();
+            logger.error('Unable to send GCM notifications!', err);
+        }).then().done();
 
-    }, 60000); // poll every 1 min.
+    }, 30000); // poll every 30 secs.
 };
 
 scheduler.stop = function() {

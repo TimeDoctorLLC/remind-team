@@ -54,8 +54,8 @@ self.addEventListener('message', function(event) {
 
     event.waitUntil(
         // pre-load our local database with the initial goal data
-        db.open().then(function() {
-            return db.data.clear();
+        db.delete().then(function() {
+            return db.open();
         }).then(function() {
             return db.data.put({id: data.employee.employee_id, company_id: data.employee.company_id, email: data.employee.email, code: data.code, goals: data.employee.goals.join('\n') });
         }).then(data => {
@@ -94,6 +94,13 @@ self.addEventListener('push', function(event) {
     console.debug('SW-GCM!', event);
 
     self.registration.update();
+
+    if (!(self.Notification && self.Notification.permission === 'granted')) {
+        // return right away and don't poll the API so that we don't update last_notification_ts
+        // we won't be able to show the notification
+        console.info('SW-NoPermission', self.Notification.permission);
+        return;
+    }
 
     const db = new Dexie(DB_NAME);
     db.version(DB_VERSION).stores(DB_SCHEMA);

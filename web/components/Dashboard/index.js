@@ -4,6 +4,7 @@ import _ from '../utils';
 import __ from 'underscore';
 import papa from 'papaparse';
 import Q from 'q';
+import moment from 'moment';
 
 import CSVLink from '../CSVLink';
 
@@ -121,17 +122,24 @@ const render = (ctx, t) => {
               <tr>
                 <th>{t('dashboard.email')}</th>
                 <th>{t('dashboard.status')}</th>
+                <th>{t('dashboard.timeSinceLastReminder')}</th>
                 <th>{t('dashboard.invitationLink')}</th>
               </tr>
             </thead>
             <tbody>
               {
                 __.map(ctx.employeesOrder, function(employeeEmail) {
+                  const warningTimeHtml = (<span className="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>);
                   const employee = ctx.employeesByEmail[employeeEmail];
+                  const minsSinceLastReminder = moment.duration(moment.utc().diff(moment.utc(employee.last_notification_ts))).asMinutes();
+                  let friendlyDuration = employee.last_notification_ts ? moment.duration(minsSinceLastReminder, 'minutes').humanize() : t('dashboard.noRemindersYet');
+                  friendlyDuration = friendlyDuration.charAt(0).toUpperCase() + friendlyDuration.slice(1);
+                  const showWarning = !employee.last_notification_ts || minsSinceLastReminder > 10080  /* more than 7 days */
                   return (
                     <tr key={employee.email}>
                       <td>{employee.email}</td>
                       <td>{employee.invite_sent ? (employee.invite_accepted ? (<span className="label label-success">{t('dashboard.statusDone')}</span>) : (<span className="label label-info">{t('dashboard.statusWaiting')}</span>)) : (<span className="label label-warning">{t('dashboard.statusInviteNotSent')}</span>)}</td>
+                      <td className={showWarning ? 'text-red' : null}>{showWarning ? warningTimeHtml : null} {friendlyDuration}</td>
                       <td>{employee.invite_code ? (<a onClick={ctx.onLinkCopy} href={'/invite/' + employee.invite_code} className="invite-link">{t('dashboard.copy')} </a>) : (<span className="not-saved label label-warning">{t('dashboard.notSaved')}</span>)}</td>
                     </tr>
                   )

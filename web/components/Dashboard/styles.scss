@@ -28,4 +28,8 @@
         font-family: 'Glyphicons Halflings';
         content: '\e205';
     }
+
+    .text-red {
+        color: $brand-danger;
+    }
 }

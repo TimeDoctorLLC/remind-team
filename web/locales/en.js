@@ -41,6 +41,8 @@ export default {
             reminderInterval: 'Reminder Interval',
             email: 'Email',
             status: 'Status',
+            timeSinceLastReminder: 'Time Since Last Reminder',
+            noRemindersYet: 'No Reminders Yet',
             invitationLink: 'Invitation Link',
             statusDone: 'Done!',
             statusWaiting: 'Waiting Registration',
