@@ -7,6 +7,7 @@ var logger = require('../../globals/logger.js').api;
 var storage = require('../../storage');
 var utils = require('./utils.js');
 var mailer = require('./mailer.js');
+var datetime = require('../../globals/datetime.js');
 
 function getInviteCode(employee) {
     return utils.createJwt({
@@ -29,14 +30,14 @@ function sendInvites(company, employees) {
     }
 
     return Q.all(_.reduce(employees, function(arr, employee) {
-        if(!employee.invite_sent) {
+        if(!employee.invite_ts) {
             // send invite
             var inviteCode = getInviteCode(employee);
             
             logger.info('Sending invite...', employee, inviteCode);
 
             arr.push(mailer.sendInvite(company, employee.email, inviteCode).then(function() {
-                employee.invite_sent = true;
+                employee.invite_ts = datetime.getCurrentTimestamp();
                 return storage.employees.save(employee);
             }).then(function() {
                 logger.info('Invite sent!', employee.email);

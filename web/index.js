@@ -15,6 +15,8 @@ import SignUpPage from './components/SignUpPage/controller'
 import InvitePage from './components/InvitePage/controller'
 import ErrorPage from './components/ErrorPage/controller'
 
+import I18nextProvider from './components/i18n'
+
 import actions from './actions'
 
 const initialState = { 
@@ -24,10 +26,16 @@ const initialState = {
 
 const storeAndHistory = storeCreator(initialState)
 
+const Root = React.createClass({
+  render: function() {
+    return (<I18nextProvider><App {...this.props} /></I18nextProvider>);
+  },
+});
+
 render(
   <Provider store={storeAndHistory.store}>
     <Router history={storeAndHistory.history}>
-      <Route path="/" component={App}>
+      <Route path="/" component={Root}>
         <IndexRoute component={IndexPage} />
         <Route path="signup" component={SignUpPage} />
         <Route path="invite/:code" component={InvitePage} />

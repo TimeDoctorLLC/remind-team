@@ -8,7 +8,7 @@ import Dashboard from '../Dashboard'
 
 const render = (ctx) => {
   return ctx.company ? (
-    <Dashboard company={ctx.company} refresh={ctx.refresh} save={ctx.save} registerAlert={ctx.registerAlert} clearAlert={ctx.clearAlert} />
+    <Dashboard company={ctx.company} refresh={ctx.refresh} save={ctx.save} registerAlert={ctx.registerAlert} clearAlert={ctx.clearAlert} resendInvite={ctx.resendInvite} />
   ) : (
     <Index onSignIn={ctx.onSignIn} onSignUp={ctx.onSignUp} />
   )

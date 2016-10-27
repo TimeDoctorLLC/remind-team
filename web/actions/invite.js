@@ -16,7 +16,7 @@ export function acceptInvite(code, gcmId) {
         if(err) {
           dispatch(registerAlert(ACCEPT_INVITE_KEY, "error", {err, res}))
         } else {
-          dispatch(registerAlert(ACCEPT_INVITE_KEY, "msg", "Invite accepted! Welcome to Goal Reminder!"));
+          dispatch(registerAlert(ACCEPT_INVITE_KEY, "msg", 'api.inviteAccepted'));
           dispatch(registerApiOk(ACCEPT_INVITE_KEY, {state_key: 'invite_accepted', body: true}))
         }
       })

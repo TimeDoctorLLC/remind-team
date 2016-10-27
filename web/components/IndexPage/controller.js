@@ -24,6 +24,9 @@ const mapDispatchToProps = (dispatch) => ({
     },
     refresh: function(companyId) {
       dispatch(actions.getCompany(companyId))
+    },
+    resendInvite: function(employeeId) {
+      dispatch(actions.resendInvite(employeeId))
     }
 })
 

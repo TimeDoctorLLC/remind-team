@@ -22,8 +22,8 @@ module.exports = function(db, eventTracker) {
         'tbl_employee.goals',
         'tbl_employee.invite_hash',
         'tbl_employee.invite_accepted',
-        'tbl_employee.invite_sent',
         'tbl_employee.gcm_id',
+        '(CASE WHEN tbl_employee.invite_ts IS NULL THEN NULL ELSE to_char(tbl_employee.invite_ts, \'' + TIMESTAMP_FORMAT + '\') END) as invite_ts',
         '(CASE WHEN tbl_employee.last_notification_ts IS NULL THEN NULL ELSE to_char(tbl_employee.last_notification_ts, \'' + TIMESTAMP_FORMAT + '\') END) as last_notification_ts',
         'to_char(tbl_employee.registration_ts, \'' + TIMESTAMP_FORMAT + '\') as registration_ts', 
         '(CASE WHEN tbl_employee.deactivation_ts IS NULL THEN NULL ELSE to_char(tbl_employee.deactivation_ts, \'' + TIMESTAMP_FORMAT + '\') END) as deactivation_ts'
@@ -88,13 +88,13 @@ module.exports = function(db, eventTracker) {
                 'email = $2',
                 'goals = $3',
                 'invite_accepted = (CASE WHEN deactivation_ts IS NULL THEN $4 ELSE false END)', 
-                'invite_sent = (CASE WHEN deactivation_ts IS NULL THEN $5 ELSE false END)',
+                'invite_ts = (CASE WHEN deactivation_ts IS NULL THEN to_timestamp($5, \'' + TIMESTAMP_FORMAT + '\') ELSE NULL END)',
                 'gcm_id = (CASE WHEN deactivation_ts IS NULL THEN $6 ELSE NULL END)',
                 'invite_hash = (CASE WHEN deactivation_ts IS NULL THEN invite_hash ELSE $7 END)',
                 'deactivation_ts = NULL',
                 'last_notification_ts = (CASE WHEN deactivation_ts IS NULL THEN to_timestamp($8, \'' + TIMESTAMP_FORMAT + '\') ELSE NULL END)'
             ).where('employee_id = $1').returning(RETURN_FIELDS).end().build();
-            var args = [data.employee_id, data.email.trim(), '{"' + data.goals.join('","') + '"}', data.invite_accepted, data.invite_sent, data.gcm_id, hash, data.last_notification_ts];
+            var args = [data.employee_id, data.email.trim(), '{"' + data.goals.join('","') + '"}', data.invite_accepted, data.invite_ts, data.gcm_id, hash, data.last_notification_ts];
             
             return (trans ? trans.execute(query, args) : db.execute(query, args)).then(function(res) {
                 eventTracker && eventTracker.trigger('employee.update', [res]);
@@ -165,7 +165,7 @@ module.exports = function(db, eventTracker) {
                     // data exists, update
                     employee.employee_id = currentEmployee.employee_id;
                     employee.invite_accepted = currentEmployee.invite_accepted;
-                    employee.invite_sent = currentEmployee.invite_sent;
+                    employee.invite_ts = currentEmployee.invite_ts;
                     employee.gcm_id = currentEmployee.gcm_id;
                 }
                 employee.company_id = companyId;

@@ -6,9 +6,7 @@ import SignIn from '../SignIn'
 import NavBar from '../NavBar'
 import Loading from '../Loading'
 
-import I18nextProvider from '../i18n'
-
-const render = (ctx) => {
+const render = (ctx, t) => {
     let alertError = null;
     let alertMsg = null;
 
@@ -18,7 +16,7 @@ const render = (ctx) => {
                 <div className="alert alert-danger">
                     {ctx.errors.map(function(err, i) {
                         return (
-                            <div key={i} className="error">{err}</div>
+                            <div key={i} className="error">{t(err)}</div>
                         )
                     })}
                 </div>
@@ -32,7 +30,7 @@ const render = (ctx) => {
                 <div className="alert alert-success">
                     {ctx.msgs.map(function(msg, i) {
                         return (
-                            <div key={i} className="msg">{msg}</div>
+                            <div key={i} className="msg">{t(msg)}</div>
                         )
                     })}
                 </div>
@@ -40,10 +38,9 @@ const render = (ctx) => {
         );
     }
 
-    const dismissLink = alertError || alertMsg ? (<a href="#" className="dismiss" onClick={ctx.dismiss}>Dismiss</a>) : null;
+    const dismissLink = alertError || alertMsg ? (<a href="#" className="dismiss" onClick={ctx.dismiss}>{t('globals.dismiss')}</a>) : null;
 
     return (
-        <I18nextProvider>
         <div id="root">
             {ctx.company ? (
                 <NavBar active={ctx.location.pathname == "/" ? 1 : 2} username={ctx.company.user_name} onSignOut={ctx.onSignOut} showProgress={ctx.loading} />
@@ -53,7 +50,6 @@ const render = (ctx) => {
             { dismissLink }
             { ctx.props.children }
         </div>
-        </I18nextProvider>
     );
 }
 

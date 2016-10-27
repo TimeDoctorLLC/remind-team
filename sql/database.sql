@@ -18,7 +18,7 @@ CREATE TABLE tbl_employee (
     goals text[] NOT NULL,
     invite_hash text NOT NULL,
     invite_accepted boolean NOT NULL DEFAULT false,
-    invite_sent boolean NOT NULL DEFAULT false,
+    invite_ts TIMESTAMP WITHOUT TIME ZONE,
     gcm_id text,
     last_notification_ts TIMESTAMP WITHOUT TIME ZONE,
     deactivation_ts TIMESTAMP WITHOUT TIME ZONE,

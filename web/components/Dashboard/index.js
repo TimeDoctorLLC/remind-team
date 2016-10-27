@@ -98,16 +98,25 @@ const render = (ctx, t) => {
                   return (
                     <tr key={employee.email}>
                       <td>{employee.email}</td>
-                      <td>{employee.invite_sent ? (employee.invite_accepted ? (<span className="label label-success">{t('dashboard.statusDone')}</span>) : (<span className="label label-info">{t('dashboard.statusWaiting')}</span>)) : (<span className="label label-warning">{t('dashboard.statusInviteNotSent')}</span>)}</td>
+                      <td>{employee.invite_ts ? (employee.invite_accepted ? (<span className="label label-success">{t('dashboard.statusDone')}</span>) : (<span className="label label-info">{t('dashboard.statusWaiting')}</span>)) : (<span className="label label-warning">{t('dashboard.statusInviteNotSent')}</span>)}</td>
                       <td className={showWarning ? 'text-red' : null}>{showWarning ? warningTimeHtml : null} {friendlyDuration}</td>
                       <td>{employee.invite_code ? (
-                          <a onClick={ctx.onLinkCopy} 
-                            data-clipboard-text={location.protocol.concat('//').concat(window.location.hostname).concat(location.port ? ':' + location.port : '') + '/invite/' + employee.invite_code} 
-                            href={'/invite/' + employee.invite_code} 
-                            className="invite-link">{t('dashboard.copy')} </a>
+                          <span>
+                            <a onClick={ctx.onLinkCopy} 
+                              data-clipboard-text={location.protocol.concat('//').concat(window.location.hostname).concat(location.port ? ':' + location.port : '') + '/invite/' + employee.invite_code} 
+                              href={'/invite/' + employee.invite_code} 
+                              title={t('dashboard.copyTitle')}
+                              className="invite-link">{t('dashboard.copy')} </a> or 
+
+                            <a onClick={ctx.onResendInvite(employee.employee_id)}  
+                              href=""
+                              title={t('dashboard.resendTitle')}
+                              className="resend-invite-link"> {t('dashboard.resend')} </a> 
+                          </span>
                           ) : (
                             <span className="not-saved label label-warning">{t('dashboard.notSaved')}</span>
-                          )}</td>
+                          )}
+                      </td>
                     </tr>
                   )
                 })
@@ -219,7 +228,7 @@ export default _.present(render, {
         if(t.state.employeesByEmail[email]) {
           newEmployeesByEmail[email] = Object.assign({}, t.state.employeesByEmail[email], { goals: goals }); 
         } else {
-          newEmployeesByEmail[email] = { email, goals: goals, invite_sent: false, invite_accepted: false };
+          newEmployeesByEmail[email] = { email, goals: goals, invite_ts: null, invite_accepted: false };
         }
       });
 
@@ -256,5 +265,11 @@ export default _.present(render, {
   onLinkCopy: function(e) {
     e.preventDefault();
     this.props.registerAlert('CLIPBOARD', 'msg', this.context.i18n.t('dashboard.inviteLinkCopied'));
+  },
+  onResendInvite: function(employeeId) {
+    return e => {
+      e.preventDefault();
+      this.props.resendInvite(employeeId);
+    }
   }
 });

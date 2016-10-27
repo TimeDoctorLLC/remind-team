@@ -46,7 +46,7 @@ export function saveCompany(company) {
         if(err) {
           dispatch(registerAlert(SAVE_COMPANY_KEY, "error", {err, res}))
         } else {
-          dispatch(registerAlert(SAVE_COMPANY_KEY, "msg", "Company data saved!"))
+          dispatch(registerAlert(SAVE_COMPANY_KEY, "msg", "api.companySaved"))
           dispatch(registerApiOk(SAVE_COMPANY_KEY, [{persist: true, state_key: 'token', body: res.body.at}, {persist: true, state_key: 'company', body: res.body.company}]))
         }
       })

@@ -29,6 +29,14 @@
         content: '\e205';
     }
 
+    .resend-invite-link {
+        text-decoration: none;
+    }
+    .resend-invite-link::after {
+        font-family: 'Glyphicons Halflings';
+        content: '\e171';
+    }
+
     .text-red {
         color: $brand-danger;
     }

@@ -8,7 +8,15 @@ export default {
             signOut: 'Sign Out',
             signIn: 'Sign In',
             signUp: 'Sign Up',
-            or: 'or'
+            or: 'or',
+            dismiss: 'Dismiss'
+        },
+
+        api: {
+            companySaved: 'Company data saved!',
+            employeeResendMustWait: 'An invitation has been recently sent to this email. Please wait a few hours before sending another one.',
+            employeeResendSuccess: 'Invite email sent!',
+            inviteAccepted: 'Invite accepted! Welcome to $t(globals.appName)!'
         },
 
         notifications: {
@@ -48,6 +56,9 @@ export default {
             statusWaiting: 'Waiting Registration',
             statusInviteNotSent: 'Invite Not Sent',
             copy: 'Copy',
+            copyTitle: 'Copy this invitation link to your clipboard',
+            resend: 'Remind',
+            resendTitle: 'Send another invitation to this email',
             notSaved: 'Not Saved',
             noTeamMembers: '<strong>No team members!</strong><br />Saving will cause $t(globals.appName) to stop sending notifications for all of the previously registered team members.',
             save: 'Save',
