@@ -211,6 +211,10 @@ export default _.present(render, {
           throw t.context.i18n.t('dashboard.csvErrorNoGoals', { email });
         }
 
+        if(__.contains(newEmployeesOrder, email)) {
+          throw t.context.i18n.t('dashboard.csvErrorDuplicate', { email });
+        }
+
         newEmployeesOrder.push(email);
         if(t.state.employeesByEmail[email]) {
           newEmployeesByEmail[email] = Object.assign({}, t.state.employeesByEmail[email], { goals: goals }); 
