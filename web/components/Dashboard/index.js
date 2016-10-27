@@ -5,49 +5,9 @@ import __ from 'underscore';
 import papa from 'papaparse';
 import Q from 'q';
 import moment from 'moment';
+import Clipboard from 'clipboard';
 
 import CSVLink from '../CSVLink';
-
-function copyToClipboard(text) {
-
-	  // create hidden text element, if it doesn't already exist
-    var targetId = "_hiddenCopyText_";
-    var origSelectionStart, origSelectionEnd;
-    
-    // must use a temporary form element for the selection and copy
-    var target = document.getElementById(targetId);
-    if (!target) {
-        target = document.createElement("textarea");
-        target.style.position = "absolute";
-        target.style.left = "-9999px";
-        target.style.top = "0";
-        target.id = targetId;
-        document.body.appendChild(target);
-    }
-    target.textContent = text;
-
-    // select the content
-    var currentFocus = document.activeElement;
-    target.focus();
-    target.setSelectionRange(0, target.value.length);
-    
-    // copy the selection
-    var succeed;
-    try {
-    	  succeed = document.execCommand("copy");
-    } catch(e) {
-        succeed = false;
-    }
-    // restore original focus
-    if (currentFocus && typeof currentFocus.focus === "function") {
-        currentFocus.focus();
-    }
-    
-    // clear temporary content
-    target.textContent = "";
-
-    return succeed;
-}
 
 function getCSVFromFile(file) {
   var deferred = Q.defer();
@@ -140,7 +100,14 @@ const render = (ctx, t) => {
                       <td>{employee.email}</td>
                       <td>{employee.invite_sent ? (employee.invite_accepted ? (<span className="label label-success">{t('dashboard.statusDone')}</span>) : (<span className="label label-info">{t('dashboard.statusWaiting')}</span>)) : (<span className="label label-warning">{t('dashboard.statusInviteNotSent')}</span>)}</td>
                       <td className={showWarning ? 'text-red' : null}>{showWarning ? warningTimeHtml : null} {friendlyDuration}</td>
-                      <td>{employee.invite_code ? (<a onClick={ctx.onLinkCopy} href={'/invite/' + employee.invite_code} className="invite-link">{t('dashboard.copy')} </a>) : (<span className="not-saved label label-warning">{t('dashboard.notSaved')}</span>)}</td>
+                      <td>{employee.invite_code ? (
+                          <a onClick={ctx.onLinkCopy} 
+                            data-clipboard-text={location.protocol.concat('//').concat(window.location.hostname).concat(location.port ? ':' + location.port : '') + '/invite/' + employee.invite_code} 
+                            href={'/invite/' + employee.invite_code} 
+                            className="invite-link">{t('dashboard.copy')} </a>
+                          ) : (
+                            <span className="not-saved label label-warning">{t('dashboard.notSaved')}</span>
+                          )}</td>
                     </tr>
                   )
                 })
@@ -202,6 +169,7 @@ export default _.present(render, {
     this.refreshInterval = setInterval(() => {
       this.props.refresh(this.props.company.company_id);
     }, 900000); // 15 mins.
+    new Clipboard('.invite-link');
   },
   componentWillUnmount: function() {
     // remove the refresh timer
@@ -283,11 +251,6 @@ export default _.present(render, {
   },
   onLinkCopy: function(e) {
     e.preventDefault();
-    this.props.clearAlert('CLIPBOARD');
-    if(copyToClipboard($(e).prop('href'))) {
-      this.props.registerAlert('CLIPBOARD', 'msg', this.context.i18n.t('dashboard.inviteLinkCopied'));
-    } else {
-      this.props.registerAlert('CLIPBOARD', 'error', this.context.i18n.t('dashboard.unableToCopy'));
-    }
+    this.props.registerAlert('CLIPBOARD', 'msg', this.context.i18n.t('dashboard.inviteLinkCopied'));
   }
 });
