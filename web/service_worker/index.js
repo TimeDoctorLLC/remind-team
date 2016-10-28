@@ -9,6 +9,8 @@ const DB_NAME = 'GoalReminderDb';
 const DB_SCHEMA = { data: 'id,company_id,email,code,goals' };
 const DB_VERSION = 1;
 
+const MIN_NOTIFICATION_DELAY_MS = 45000;
+
 i18next.init({
     interpolation: {
         escapeValue: false
@@ -24,6 +26,7 @@ i18next.init({
 console.debug('SW-Started', self);
 
 let reminderIndex = -1;
+let lastNotificationMs = 0;
 
 function notify(title, options) {
     if (!(self.Notification && self.Notification.permission === 'granted')) {
@@ -93,8 +96,6 @@ self.addEventListener('push', function(event) {
     // gcm notification received, so we must retrieve the goals and show the notific.
     console.debug('SW-GCM!', event);
 
-    self.registration.update();
-
     if (!(self.Notification && self.Notification.permission === 'granted')) {
         // return right away and don't poll the API so that we don't update last_notification_ts
         // we won't be able to show the notification
@@ -145,11 +146,25 @@ self.addEventListener('push', function(event) {
             return;
         }
 
-        return notify('', {
-            'body': goals[reminderIndex],
-            'icon': 'images/icon.png',
-            'tag': 'rt-reminder'
-        });
+        const currentMs = new Date().getTime();
+        if(currentMs - lastNotificationMs > MIN_NOTIFICATION_DELAY_MS) {
+            // check for updates
+            // if we trigger this without showing a notification
+            // a default notification warning the user that something in the background
+            // has just updated will pop up
+            self.registration.update();
+
+            lastNotificationMs = currentMs;
+            return notify('', {
+                'body': goals[reminderIndex],
+                'icon': 'images/icon.png',
+                'tag': 'rt-reminder'
+            });
+        }
+
+        // this could happen when the person goes online and several notifications are pending
+        console.debug('Received multiple GCM notifications in less than ' + (MIN_NOTIFICATION_DELAY_MS / 1000) + ' secs...', (currentMs - lastNotificationMs) / 1000);
+
     }).catch(e => {
         db.close();
         console.error('SW-UnableToShowGoals', e);
