@@ -9,6 +9,8 @@ import Clipboard from 'clipboard';
 
 import CSVLink from '../CSVLink';
 
+// this uses PapaParse to get an array structure from the CSV file
+// it also promisifies the procedure
 function getCSVFromFile(file) {
   var deferred = Q.defer();
 
@@ -29,9 +31,10 @@ function getCSVFromFile(file) {
   return deferred.promise;
 }
 
+// allowed intervals of time for reminders in the dropdown
 const MINUTE = 60;
 const HOUR = 3600;
-const intervals = [{ label: '1 min', value: 60 }].concat(__.map(__.range(1, 25), function(i) {
+const INTERVALS = [{ label: '1 min', value: 60 }].concat(__.map(__.range(1, 25), function(i) {
   const secs = MINUTE * i * 60;
   const hours = Math.trunc(secs / HOUR);
   const mins = Math.trunc((secs % HOUR) / MINUTE);
@@ -42,21 +45,34 @@ const intervals = [{ label: '1 min', value: 60 }].concat(__.map(__.range(1, 25),
   };
 }));
 
+const BASE_LOCATION = location.protocol.concat('//').concat(window.location.hostname).concat(location.port ? ':' + location.port : '');
+
 let csvTemplate = null;
 
 const render = (ctx, t) => {
+
   csvTemplate = [
-    [t('csv.email'), t('csv.goal', { index: 1 }), t('csv.goal', { index: 2 }), t('csv.goal', { index: 3 }), t('csv.goal', { index: 4 }), t('csv.goal', { index: 5 }), t('csv.youCanAddMore'), , , , t('csv.doNotRemoveHeader')],
-    [ctx.company.user_email, t('csv.exGoal1'), t('csv.exGoal2')]
+    // header row
+    [
+      t('csv.email'), t('csv.goal', { index: 1 }), t('csv.goal', { index: 2 }), t('csv.goal', { index: 3 }), 
+      t('csv.goal', { index: 4 }), t('csv.goal', { index: 5 }), t('csv.youCanAddMore'), , , , t('csv.doNotRemoveHeader')
+    ],
+    // example row
+    [
+      ctx.company.user_email,
+      t('csv.exGoal1'), t('csv.exGoal2')
+    ]
   ];
   
   if(ctx.company.employees.length > 0 || ctx.employeesOrder.length > 0) {
+    // if there's a list of employees, show them...
     return (
       <div className="dashboard">
         <p className="lead">{t('dashboard.youCurrentlyHaveMembers', { count: ctx.company.employees ? ctx.company.employees.length : 0 })}</p>
         <form id="upload-csv-form">
-          <CSVLink className="btn btn-info" data={ctx.getCsv}>{t('dashboard.downloadCsv')}</CSVLink> 
-          <input id="upload-csv-input" type="file" name="csv" accept=".csv" ref="csvFile" onChange={ctx.onUploadCsvChange} /> <a className="btn btn-info" href="#" onClick={ctx.onUploadCsv}>{t('dashboard.uploadCsv')}</a>
+          <CSVLink className="btn btn-info" data={ctx.getCsv}>{t('dashboard.downloadCsv')}</CSVLink>&nbsp; 
+          <input id="upload-csv-input" type="file" name="csv" accept=".csv" ref="csvFile" onChange={ctx.onUploadCsvChange} /> 
+          <a className="btn btn-info" href="#" onClick={ctx.onUploadCsv}>{t('dashboard.uploadCsv')}</a>
         </form>
 
         <hr />
@@ -65,7 +81,7 @@ const render = (ctx, t) => {
           <label htmlFor="goal-interval" className="control-label">{t('dashboard.reminderInterval')}</label>
           <div>
             <select id="goal-interval" className="form-control" ref="notification_interval" defaultValue={ctx.company.notification_interval}>
-              {intervals.map((i) => (
+              {INTERVALS.map((i) => (
                 <option key={i.value} value={i.value}>{i.label}</option>
               ))}
             </select>
@@ -75,8 +91,7 @@ const render = (ctx, t) => {
         <hr />
 
         {
-          ctx.employeesOrder.length > 0 ?
-          (
+          ctx.employeesOrder.length > 0 ? (
             <table className="table table-striped">
             <thead>
               <tr>
@@ -86,71 +101,88 @@ const render = (ctx, t) => {
                 <th>{t('dashboard.invitationLink')}</th>
               </tr>
             </thead>
-            <tbody>
-              {
-                __.map(ctx.employeesOrder, function(employeeEmail) {
-                  const warningTimeHtml = (<span className="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>);
-                  const employee = ctx.employeesByEmail[employeeEmail];
-                  const minsSinceLastReminder = moment.duration(moment.utc().diff(moment.utc(employee.last_notification_ts))).asMinutes();
-                  let friendlyDuration = employee.last_notification_ts ? moment.duration(minsSinceLastReminder, 'minutes').humanize() : t('dashboard.noRemindersYet');
-                  friendlyDuration = friendlyDuration.charAt(0).toUpperCase() + friendlyDuration.slice(1);
-                  const showWarning = !employee.last_notification_ts || minsSinceLastReminder > 10080  /* more than 7 days */
-                  return (
-                    <tr key={employee.email}>
-                      <td>{employee.email}</td>
-                      <td>{employee.invite_ts ? (employee.invite_accepted ? (<span className="label label-success">{t('dashboard.statusDone')}</span>) : (<span className="label label-info">{t('dashboard.statusWaiting')}</span>)) : (<span className="label label-warning">{t('dashboard.statusInviteNotSent')}</span>)}</td>
-                      <td className={showWarning ? 'text-red' : null}>{showWarning ? warningTimeHtml : null} {friendlyDuration}</td>
-                      <td>{employee.invite_code ? (
-                          <span>
-                            <a onClick={ctx.onLinkCopy} 
-                              data-clipboard-text={location.protocol.concat('//').concat(window.location.hostname).concat(location.port ? ':' + location.port : '') + '/invite/' + employee.invite_code} 
-                              href={'/invite/' + employee.invite_code} 
-                              title={t('dashboard.copyTitle')}
-                              className="invite-link">{t('dashboard.copy')} </a> or 
-
-                            <a onClick={ctx.onResendInvite(employee.employee_id)}  
-                              href=""
-                              title={t('dashboard.resendTitle')}
-                              className="resend-invite-link"> {t('dashboard.resend')} </a> 
-                          </span>
+            <tbody>{
+              __.map(ctx.employeesOrder, function(employeeEmail) {
+                const warningTimeHtml = (<span className="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>);
+                const employee = ctx.employeesByEmail[employeeEmail];
+                const minsSinceLastReminder = moment.duration(moment.utc().diff(moment.utc(employee.last_notification_ts))).asMinutes();
+                let friendlyDuration = employee.last_notification_ts ? moment.duration(minsSinceLastReminder, 'minutes').humanize() : t('dashboard.noRemindersYet');
+                friendlyDuration = friendlyDuration.charAt(0).toUpperCase() + friendlyDuration.slice(1);
+                const showWarning = !employee.last_notification_ts || minsSinceLastReminder > 10080  /* more than 7 days */
+                
+                return (
+                  <tr key={employee.email}>
+                    <td>{employee.email}</td>
+                    <td>{
+                      employee.invite_ts ? (
+                        employee.invite_accepted ? (
+                          <span className="label label-success">{t('dashboard.statusDone')}</span>
+                        ) : (
+                          <span className="label label-info">{t('dashboard.statusWaiting')}</span>
+                        )
+                      ) : (
+                        <span className="label label-warning">{t('dashboard.statusInviteNotSent')}</span>
+                      )
+                    }</td>
+                    <td className={showWarning ? 'text-red' : null}>{showWarning ? warningTimeHtml : null} {friendlyDuration}</td>
+                    <td>{
+                          employee.invite_code ? (
+                            <span>
+                              <a onClick={ctx.onLinkCopy} 
+                                data-clipboard-text={BASE_LOCATION + '/invite/' + employee.invite_code} 
+                                href={'/invite/' + employee.invite_code} 
+                                title={t('dashboard.copyTitle')}
+                                className="invite-link">{t('dashboard.copy')} </a>
+                                
+                              {
+                                  !employee.invite_ts || !employee.invite_accepted ? (
+                                    <span> or <a onClick={ctx.onResendInvite(employee.employee_id)}  
+                                      href=""
+                                      title={t('dashboard.resendTitle')}
+                                      className="resend-invite-link"> {t('dashboard.resend')} </a>
+                                    </span>
+                                  ) : null
+                              }
+                            </span>
                           ) : (
                             <span className="not-saved label label-warning">{t('dashboard.notSaved')}</span>
-                          )}
-                      </td>
-                    </tr>
-                  )
-                })
-              }
-            </tbody>
+                          )
+                    }</td>
+                  </tr>
+                )
+              })
+            }</tbody>
             </table>
-          ) 
-          :
-          (
+          ) : (
             <p className="empty">{t('dashboard.noTeamMembers')}</p>
           )
         }
 
         <div>
           <div className="pull-left"><a className="btn btn-success" onClick={ctx.onSave}>{t('dashboard.save')}</a></div>
-          <div className="pull-right"><a className="btn btn-default" onClick={ctx.onRefresh}><span className="glyphicon glyphicon-refresh" aria-hidden="true"></span> {t('dashboard.refresh')}</a></div>
+          <div className="pull-right"><a className="btn btn-default" onClick={ctx.onRefresh}>
+            <span className="glyphicon glyphicon-refresh" aria-hidden="true"></span> {t('dashboard.refresh')}
+          </a></div>
         </div>
       </div>
     );
   }
 
+  // if there are no employees yet
   return (
     <div className="dashboard">
       <p className="lead">{t('dashboard.toGetStarted')}</p>
       <form id="upload-csv-form">
-        <CSVLink className="btn btn-info" data={csvTemplate}>{t('dashboard.downloadCsv')}</CSVLink> 
-        <input id="upload-csv-input" type="file" name="csv" accept=".csv" ref="csvFile" onChange={ctx.onUploadCsvChange} /> <a className="btn btn-info" href="#" onClick={ctx.onUploadCsv}>{t('dashboard.uploadCsv')}</a>
+        <CSVLink className="btn btn-info" data={csvTemplate}>{t('dashboard.downloadCsv')}</CSVLink>&nbsp; 
+        <input id="upload-csv-input" type="file" name="csv" accept=".csv" ref="csvFile" onChange={ctx.onUploadCsvChange} /> 
+        <a className="btn btn-info" href="#" onClick={ctx.onUploadCsv}>{t('dashboard.uploadCsv')}</a>
       </form>
     </div>
   )
 };
 
+// given the props, obtain the state
 function initState(props) {
-    console.debug('initState', props);
     return {
       employeesOrder: __.map(props.company.employees, function(employee) {
         return employee.email.toLowerCase().trim()
@@ -164,6 +196,8 @@ function initState(props) {
 
 export default _.present(render, {
   refreshInterval: null,
+
+  // component life-cycle 
   getInitialState: function() {
     // for the first time
     return initState(this.props);
@@ -186,6 +220,8 @@ export default _.present(render, {
       clearInterval(this.refreshInterval);
     }
   },
+
+  // component interaction
   onRefresh: function() {
     this.props.refresh(this.props.company.company_id);
   },
@@ -242,7 +278,6 @@ export default _.present(render, {
     }).done();
 
     $('#upload-csv-form').trigger('reset');
-    //$(e).unwrap();
   },
   onSave: function(e) {
     e.preventDefault();
