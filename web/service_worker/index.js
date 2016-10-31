@@ -127,7 +127,8 @@ self.addEventListener('push', function(event) {
         data = data[0];
 
         if(!data) {
-            return [];
+            console.debug('Received GCM notification but there\'s no registration!');
+            return null;
         }
 
         var request = new Request('/api/v1/employees/poll', {
@@ -148,12 +149,16 @@ self.addEventListener('push', function(event) {
         });
 
     }).then(function(data) {
+        if(!data) {
+            return null;
+        }
+
         const goals = data.goals ? data.goals.split('\n') : [];
         data.goal_index++;
         if(data.goal_index >= goals.length) {
             data.goal_index = 0;
         }
-        return db.data.put(data).then(function() { 
+        return db.data.put(data).then(function() {
             return goals.length > 0 ? goals[data.goal_index] : null; 
         });
     }).then(function(goal) {
