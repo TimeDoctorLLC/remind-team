@@ -80,8 +80,8 @@ router.post('/:employeeId/remind', jwtEnforcer, function(req, res, next) {
             var currentMoment = moment.utc();
             var elapsedMs = currentMoment.diff(lastInviteMoment);
 
-            // must wait for at least 6 hours
-            if(elapsedMs < 21600000) {
+            // must wait for at least 2 mins
+            if(elapsedMs < 120000) {
                 throw { status: 409, message: 'already sent, must wait'};
             }
         }

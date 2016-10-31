@@ -14,7 +14,7 @@ export default {
 
         api: {
             companySaved: 'Company data saved!',
-            employeeResendMustWait: 'An invitation has been recently sent to this email. Please wait a few hours before sending another one.',
+            employeeResendMustWait: 'An invitation has been recently sent to this email. Please wait a few minutes before sending another one.',
             employeeResendSuccess: 'Invite email sent!',
             inviteAccepted: 'Invite accepted! Welcome to $t(globals.appName)!'
         },
