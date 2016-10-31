@@ -135,13 +135,7 @@ self.addEventListener('push', function(event) {
     }).then(function(goals) {
         db.close();
 
-        // show the goals notification
-        reminderIndex++;
-        if(reminderIndex >= goals.length) {
-            reminderIndex = 0;
-        }
-
-        if(goals.length <= 0 || !goals[reminderIndex]) {
+        if(goals.length <= 0) {
             console.warn('No goals/reminders found!', goals);
             return;
         }
@@ -153,6 +147,12 @@ self.addEventListener('push', function(event) {
             // a default notification warning the user that something in the background
             // has just updated will pop up
             self.registration.update();
+
+            // show the goals notification
+            reminderIndex++;
+            if(reminderIndex >= goals.length) {
+                reminderIndex = 0;
+            }
 
             lastNotificationMs = currentMs;
             return notify('', {
