@@ -155,7 +155,7 @@ self.addEventListener('push', function(event) {
 
         const goals = data.goals ? data.goals.split('\n') : [];
         data.goal_index++;
-        if(data.goal_index >= goals.length) {
+        if(isNaN(data.goal_index) || data.goal_index >= goals.length) {
             data.goal_index = 0;
         }
         return db.data.put(data).then(function() {
