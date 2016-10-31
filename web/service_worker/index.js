@@ -6,7 +6,7 @@ import resources from '../locales';
 const Dexie = require('dexie');
 
 const DB_NAME = 'GoalReminderDb';
-const DB_SCHEMA = { data: 'id,company_id,email,code,goals' };
+const DB_SCHEMA = { data: 'id,company_id,email,code,goals,goal_index' };
 const DB_VERSION = 1;
 
 const MIN_NOTIFICATION_DELAY_MS = 45000;
@@ -25,7 +25,6 @@ i18next.init({
 
 console.debug('SW-Started', self);
 
-let reminderIndex = -1;
 let lastNotificationMs = 0;
 
 function notify(title, options) {
@@ -60,7 +59,14 @@ self.addEventListener('message', function(event) {
         db.delete().then(function() {
             return db.open();
         }).then(function() {
-            return db.data.put({id: data.employee.employee_id, company_id: data.employee.company_id, email: data.employee.email, code: data.code, goals: data.employee.goals.join('\n') });
+            return db.data.put({
+                id: data.employee.employee_id, 
+                company_id: data.employee.company_id, 
+                email: data.employee.email, 
+                code: data.code, 
+                goals: data.employee.goals.join('\n'), 
+                goal_index: -1
+            });
         }).then(data => {
             db.close();
 
@@ -103,6 +109,15 @@ self.addEventListener('push', function(event) {
         return;
     }
 
+    const currentMs = new Date().getTime();
+    if(currentMs - lastNotificationMs <= MIN_NOTIFICATION_DELAY_MS) {
+        // this could happen when the person goes online and several notifications are pending
+        console.debug('Received multiple GCM notifications in less than ' + (MIN_NOTIFICATION_DELAY_MS / 1000) + ' secs...', (currentMs - lastNotificationMs) / 1000);
+        return;
+    }
+
+    lastNotificationMs = currentMs;
+
     const db = new Dexie(DB_NAME);
     db.version(DB_VERSION).stores(DB_SCHEMA);
 
@@ -126,44 +141,41 @@ self.addEventListener('push', function(event) {
             return response.json();
         }).then(function(goals) {
             data.goals = goals.join('\n');
-            return db.data.put(data).then(function() { return goals; });
+            return data;
         }).catch(e => {
             console.error('SW-UnableToFetchGoals', e);
-            return data.goals ? data.goals.split('\n') : [];
+            return data;
         });
 
-    }).then(function(goals) {
+    }).then(function(data) {
+        const goals = data.goals ? data.goals.split('\n') : [];
+        data.goal_index++;
+        if(data.goal_index >= goals.length) {
+            data.goal_index = 0;
+        }
+        return db.data.put(data).then(function() { 
+            return goals.length > 0 ? goals[data.goal_index] : null; 
+        });
+    }).then(function(goal) {
         db.close();
 
-        if(goals.length <= 0) {
-            console.warn('No goals/reminders found!', goals);
+        if(!goal) {
+            console.warn('No goals/reminders found!');
             return;
         }
 
-        const currentMs = new Date().getTime();
-        if(currentMs - lastNotificationMs > MIN_NOTIFICATION_DELAY_MS) {
-            // check for updates
-            // if we trigger this without showing a notification
-            // a default notification warning the user that something in the background
-            // has just updated will pop up
-            self.registration.update();
+        // check for updates
+        // if we trigger this without showing a notification
+        // a default notification warning the user that something in the background
+        // has just updated will pop up
+        self.registration.update();
 
-            // show the goals notification
-            reminderIndex++;
-            if(reminderIndex >= goals.length) {
-                reminderIndex = 0;
-            }
-
-            lastNotificationMs = currentMs;
-            return notify('', {
-                'body': goals[reminderIndex],
-                'icon': 'images/icon.png',
-                'tag': 'rt-reminder'
-            });
-        }
-
-        // this could happen when the person goes online and several notifications are pending
-        console.debug('Received multiple GCM notifications in less than ' + (MIN_NOTIFICATION_DELAY_MS / 1000) + ' secs...', (currentMs - lastNotificationMs) / 1000);
+        // show the goals notification
+        return notify('', {
+            'body': goal,
+            'icon': 'images/icon.png',
+            'tag': 'rt-reminder'
+        });
 
     }).catch(e => {
         db.close();
