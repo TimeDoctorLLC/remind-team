@@ -106,7 +106,7 @@ const render = (ctx, t) => {
                 const warningTimeHtml = (<span className="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>);
                 const employee = ctx.employeesByEmail[employeeEmail];
                 const minsSinceLastReminder = moment.duration(moment.utc().diff(moment.utc(employee.last_notification_ts))).asMinutes();
-                let friendlyDuration = employee.last_notification_ts ? moment.duration(minsSinceLastReminder, 'minutes').humanize() : t('dashboard.noRemindersYet');
+                let friendlyDuration = employee.invite_accepted && employee.last_notification_ts ? moment.duration(minsSinceLastReminder, 'minutes').humanize() : t('dashboard.noRemindersYet');
                 friendlyDuration = friendlyDuration.charAt(0).toUpperCase() + friendlyDuration.slice(1);
                 const showWarning = !employee.last_notification_ts || minsSinceLastReminder > 10080  /* more than 7 days */
                 
